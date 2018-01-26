@@ -1,0 +1,5 @@
+c:\users\darwi\documents\visual studio 2015\Projects\GlobalGamejamPrototype\GlobalGamejamPrototype\bin\GlobalGamejamPrototype.dll.config
+c:\users\darwi\documents\visual studio 2015\Projects\GlobalGamejamPrototype\GlobalGamejamPrototype\bin\GlobalGamejamPrototype.dll
+c:\users\darwi\documents\visual studio 2015\Projects\GlobalGamejamPrototype\GlobalGamejamPrototype\bin\GlobalGamejamPrototype.pdb
+c:\users\darwi\documents\visual studio 2015\Projects\GlobalGamejamPrototype\GlobalGamejamPrototype\obj\Debug\GlobalGamejamPrototype.dll
+c:\users\darwi\documents\visual studio 2015\Projects\GlobalGamejamPrototype\GlobalGamejamPrototype\obj\Debug\GlobalGamejamPrototype.pdb
