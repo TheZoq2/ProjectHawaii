@@ -1054,6 +1054,16 @@ Prefab:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 224025660726264094, guid: 281896c119564054e945d60b1497f1d1,
+        type: 2}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.000025749025
+      objectReference: {fileID: 0}
+    - target: {fileID: 224025660726264094, guid: 281896c119564054e945d60b1497f1d1,
+        type: 2}
+      propertyPath: m_SizeDelta.y
+      value: 36
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 281896c119564054e945d60b1497f1d1, type: 2}
   m_IsPrefabParent: 0
@@ -1305,8 +1315,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d18c93dc1423dfe42b69aa744185472a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _serverSequence: 
-  _mySequence: 
 --- !u!1 &750407874
 GameObject:
   m_ObjectHideFlags: 0
