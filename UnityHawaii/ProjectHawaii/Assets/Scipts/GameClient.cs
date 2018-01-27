@@ -23,7 +23,7 @@ public class GameClient : MonoBehaviour {
         client = new NetworkClient();
         client.RegisterHandler(MsgType.Connect, OnConnected);
         client.RegisterHandler(MessageType.SequenceStart, OnSequenceStart);
-        client.Connect("localhost", 4444);
+        client.Connect("localhost", 2000);
     }
 
     public void OnConnected(NetworkMessage rMessage)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.Networking;
 using UnityEngine;
 using Messages;
+using System.Timers;
 
 
 public class GameServer : MonoBehaviour {
@@ -13,18 +14,36 @@ public class GameServer : MonoBehaviour {
         NetworkServer.RegisterHandler(MessageType.SequenceComplete, OnSequenceComplete);
         NetworkServer.RegisterHandler(MsgType.Connect, OnClientConnect);
         NetworkServer.Listen(2000);
+
+        // var t = new Timer();
+        // t.Elapsed += new ElapsedEventHandler(OnTimer);
+        // t.Interval = 5000;
+        // t.Start();
+
+        StartCoroutine("TimerCoRoutine");
+    }
+
+    private IEnumerator TimerCoRoutine() {
+        while(true) {
+            yield return new WaitForSeconds(5);
+            OnTimer();
+        }
+    }
+
+
+    void OnTimer() {
+        sendSequence();
     }
 
 
     // Use this for initialization
     void Start () {
-        //SetupServer();
-
+        SetupServer();
     }
 
     // Update is called once per frame
     void Update () {
-
+        
     }
 
     void OnMouseDown() {
@@ -39,6 +58,9 @@ public class GameServer : MonoBehaviour {
 
     void OnClientConnect(NetworkMessage msg) {
         Debug.Log("Client connected");
+    }
+
+    void sendSequence() {
         var sequence = generateSequence();
         NetworkServer.SendToAll(MessageType.SequenceStart, sequence);
     }
