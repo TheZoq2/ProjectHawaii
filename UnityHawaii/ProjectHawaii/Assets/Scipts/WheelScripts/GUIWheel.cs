@@ -5,7 +5,8 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
-public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
+public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler,
+    IPointerUpHandler, IResetable
 {
 
     private float wheelAngle;
@@ -71,6 +72,7 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         //text.text = CurrentRotation.ToString();
 
         TableControlsManager.instance.SetWheel(CurrentRotation);
+        TableControlsManager.instance.AddResetable(this);
         if (text != null) text.text = CurrentRotation.ToString();
         onValueChange.Invoke();
 
@@ -108,4 +110,9 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
     {
         rollBackTimer = 0;
     }*/
+    public void Reset()
+    {
+        transform.localRotation *= Quaternion.Euler(0, 0, -CurrentRotation);
+        CurrentRotation = 0;
+    }
 }
