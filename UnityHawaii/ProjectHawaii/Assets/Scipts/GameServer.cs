@@ -12,7 +12,7 @@ public class GameServer : MonoBehaviour {
     public void SetupServer() {
         NetworkServer.RegisterHandler(MessageType.SequenceComplete, OnSequenceComplete);
         NetworkServer.RegisterHandler(MsgType.Connect, OnClientConnect);
-        NetworkServer.Listen(4444);
+        NetworkServer.Listen(2000);
     }
 
 
