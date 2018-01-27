@@ -15,18 +15,17 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
     public float GoalPrecision = 10;
     public float CurrentRotation = 0;
     private bool isRotating = false;
-
     public Text text;
-    public LedScript led;
+
     public UnityEvent onValueChange;
 
-    // Use this for initialization
-    void Start () {
-        text.text = "0";
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    private void Start()
+    {
+        text.text = "0.0";
+    }
+
+    // Update is called once per frame
+    void Update () {
         if (rollBackTimer > 0)
         {
             rollBackTimer -= Time.deltaTime;
@@ -37,11 +36,11 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
             if (transform.localRotation.eulerAngles.z  > wheelRotationGoal - GoalPrecision && 
                 transform.localRotation.eulerAngles.z  < wheelRotationGoal + GoalPrecision)
             {
-                led.LightUp();
+                PositionCorrect();
             }
             else
             {
-                led.LightOff();
+                PositionInCorrect();
             }
         }
     }
@@ -75,6 +74,17 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         isRotating = false;
         //StartRollBack();
     }
+
+    public void PositionCorrect()
+    {
+
+    }
+
+    public void PositionInCorrect()
+    {
+
+    }
+
     /*
     private void StartRollBack()
     {

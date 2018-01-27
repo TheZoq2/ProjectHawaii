@@ -16,7 +16,7 @@ namespace Assets.Scripts
             Color.yellow
         };
 
-        private GameObject[] _colorGameObjects;
+        public GameObject[] _colorGameObjects;
 
         void Start()
         {
