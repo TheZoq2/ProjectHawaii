@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 #pragma warning disable 0414
-public class TableControlsManager : MonoBehaviour
+public class TableControlsManager
 {
     //Always receive a sequence of 2 + n * 3 (where n = Sequence length) integers: 
     //First Position: Disaster - Volcano(1), Earthquake (2), Missle (3), Tornado(4)
@@ -27,9 +27,27 @@ public class TableControlsManager : MonoBehaviour
     private enum Disaster : int { Volcano = 1, Earthquake = 2, Missle = 3, Tornado = 4 }
     private enum Component : int { Lever = 1, Wheel = 2, Switches = 3, Scrollbar = 4, Sliders = 5 }
 
-    [SerializeField, ReadOnly]
+    private Component _lastComponent = default(Component);
+    private int _lastSubComponent = 0; //if any
+
+    private static TableControlsManager _instance = null;
+    public static TableControlsManager instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new TableControlsManager();
+                //_instance._mySequence = new List<int>();
+                //_instance._serverSequence = new List<int> { 3, 3, 3, 3, 3 };
+            }
+            return _instance;
+        }
+    }
+
+    //[SerializeField, ReadOnly]
     private List<int> _serverSequence = null;
-    [SerializeField, ReadOnly]
+    //[SerializeField, ReadOnly]
     private List<int> _mySequence = null;
 
     //private struct SeqAction
@@ -63,6 +81,14 @@ public class TableControlsManager : MonoBehaviour
 
 
     #region Sequence Management
+    public string PrintCollection<T>(IEnumerable<T> col)
+    {
+        string result = "";
+        foreach (var item in col)
+            result += item.ToString() + ", "; // Replace this with your version of printing
+
+        return result;
+    }
 
     public bool SequenceIsCorrect()
     {
@@ -73,8 +99,12 @@ public class TableControlsManager : MonoBehaviour
         }
 
         List<int> localSequence = new List<int>(_mySequence);
-        localSequence.Insert(0, _serverSequence[1]);
-        localSequence.Insert(0, _serverSequence[0]);
+
+        if (_mySequence?.Count != 0)
+        {
+            localSequence.Insert(0, _serverSequence[1]);
+            localSequence.Insert(0, _serverSequence[0]);
+        }
 
         return localSequence.SequenceEqual(_serverSequence);
     }
@@ -87,7 +117,7 @@ public class TableControlsManager : MonoBehaviour
         Debug.Log("Flushed local and server sequence. (Client-side Cache)");
     }
 
-    public bool SetIfSequenceIsCorrectAndFlush()
+    public bool GetIfSequenceIsCorrectAndFlush()
     {
         bool result = SequenceIsCorrect();
         FlushLocalSequence();
@@ -114,13 +144,59 @@ public class TableControlsManager : MonoBehaviour
 
     public void Log(params int[] list)
     {
+        Component component = (Component)list[0];
+        if (DefendAgainstOverflow(list, component)) return;
+
+        _lastComponent = component;
         _mySequence.AddRange(list);
         if (_mySequence.Count >= _serverSequence.Count)
         {
             //Debug.Log("My Sequence Full");
             throw new NotImplementedException("My Sequence Full");
         }
+
+        //Debug.Log(_mySequence.ToString());
+        Debug.Log(PrintCollection(_mySequence));
     }
+
+    private bool DefendAgainstOverflow(int[] list, Component component)
+    {
+        if (component != _lastComponent) return false;
+
+        switch (component)
+        {
+            case Component.Lever:
+            case Component.Scrollbar:
+            case Component.Wheel:
+            {
+                _mySequence[_mySequence.Count - 1] = list[1];
+                Debug.Log(PrintCollection(_mySequence));
+                return true;
+            }
+            case Component.Switches:
+            case Component.Sliders:
+            {
+                if (_lastSubComponent == list[1])
+                {
+                    _mySequence[_mySequence.Count - 1] = list[2];
+
+                    Debug.Log(PrintCollection(_mySequence));
+                    return true;
+                }
+
+                _lastSubComponent = list[1];
+                break;
+            }
+            default:
+            {
+                Debug.Log("Unexpected component type: " + list[0]);
+                break;
+            }
+        }
+
+        return false;
+    }
+
     #endregion
 
     #region Public Receiver Functions
@@ -148,24 +224,24 @@ public class TableControlsManager : MonoBehaviour
 
     public void SetSwitch(int position, bool switchValue = false)
     {
-        if (position < 0 && position > 2)
+        if (position < 1 && position > 3)
             throw new InvalidOperationException
                 ("Input Switch Position out of range (0..2).");
-        _switches[position] = switchValue;
+        _switches[position - 1] = switchValue;
 
         Log((int)Component.Switches, position, Convert.ToInt32(switchValue));
     }
 
     public void SetSlider(int position, float sliderValue = 0)
     {
-        if (position < 0 && position > 2)
+        if (position < 1 && position > 3)
             throw new InvalidOperationException
                 ("Input Slider Position out of range (0..2).");
         if (sliderValue < 0 && sliderValue > 1)
             throw new InvalidOperationException
                 ("Input Slider Value out of range (0..1).");
 
-        _sliders[position] = (int)(sliderValue * 100);
+        _sliders[position - 1] = (int)(sliderValue * 100);
 
         Log((int)Component.Sliders, position, (int)(sliderValue * 100));
     }

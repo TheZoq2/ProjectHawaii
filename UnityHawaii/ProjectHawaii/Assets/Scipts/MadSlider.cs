@@ -3,18 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using UnityEngine.Events;
 
 [ExecuteInEditMode]
-public class MadSlider : MonoBehaviour {
+public class MadSlider : MonoBehaviour
+{
 
-    [SerializeField] RectTransform[] _points;
-    [SerializeField] RectTransform _mover;
+    [SerializeField]
+    RectTransform[] _points;
+    [SerializeField]
+    RectTransform _mover;
 
-    [SerializeField] float _oneMoveTime = 0.3f;
-    [SerializeField] float _widthDelta;
+    [SerializeField]
+    float _oneMoveTime = 0.3f;
+    [SerializeField]
+    float _widthDelta;
 
-    [SerializeField, ReadOnly] int currentId;
-
+    [SerializeField, ReadOnly]
+    int currentId;
 
     public void SetIsland(int id)
     {
@@ -42,13 +48,15 @@ public class MadSlider : MonoBehaviour {
                     OnComplete(() => _mover.DOMove(tarPos, _oneMoveTime)));
             }
         }
+
+        TableControlsManager.instance.SetLever(id);
         currentId = id;
     }
 
 
     private void OnGUI()
     {
-        foreach(var point in _points)
+        foreach (var point in _points)
         {
             var pos = point.anchoredPosition;
 
