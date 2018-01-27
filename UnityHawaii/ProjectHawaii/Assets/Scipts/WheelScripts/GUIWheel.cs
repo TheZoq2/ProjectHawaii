@@ -15,13 +15,17 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
     public float GoalPrecision = 10;
     public float CurrentRotation = 0;
     private bool isRotating = false;
+    public Text text;
 
     public UnityEvent onValueChange;
 
- 
-	
-	// Update is called once per frame
-	void Update () {
+    private void Start()
+    {
+        text.text = "0.0";
+    }
+
+    // Update is called once per frame
+    void Update () {
         if (rollBackTimer > 0)
         {
             rollBackTimer -= Time.deltaTime;
@@ -31,12 +35,12 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         {
             if (transform.localRotation.eulerAngles.z  > wheelRotationGoal - GoalPrecision && 
                 transform.localRotation.eulerAngles.z  < wheelRotationGoal + GoalPrecision)
-            { 
-                //on
+            {
+                PositionCorrect();
             }
             else
             {
-                //off
+                PositionInCorrect();
             }
         }
     }
@@ -61,7 +65,7 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - wheelAngle ;
         transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         CurrentRotation = transform.localRotation.eulerAngles.z;
-        //text.text = CurrentRotation.ToString();
+        text.text = CurrentRotation.ToString();
         onValueChange.Invoke();
     }
 
@@ -70,6 +74,17 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         isRotating = false;
         //StartRollBack();
     }
+
+    public void PositionCorrect()
+    {
+
+    }
+
+    public void PositionInCorrect()
+    {
+
+    }
+
     /*
     private void StartRollBack()
     {
