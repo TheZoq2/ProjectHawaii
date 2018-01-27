@@ -4,9 +4,6 @@ const express = require('express')
 
 function user_handler(socket: SocketIO.Socket): void {
     console.log("user connected")
-    socket.on('disconnect', () => {
-        console.log("client disconnected")
-    })
 }
 
 function main(): void {
