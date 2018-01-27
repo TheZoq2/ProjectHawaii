@@ -1,5 +1,5 @@
 var _this = this;
-var SimpleGame = (function () {
+var SimpleGame = /** @class */ (function () {
     function SimpleGame() {
         this.game = new Phaser.Game(1200, 600, Phaser.AUTO, "content", { preload: this.preload, create: this.create, update: this.update });
     }
