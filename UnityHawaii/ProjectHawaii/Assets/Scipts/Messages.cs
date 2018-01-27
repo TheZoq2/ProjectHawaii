@@ -21,18 +21,19 @@ namespace Messages {
         Wheel,
         Switches,
         Scroll,
-        Sliders
+        Sliders,
+        Total
     }
 
     public class ComponentState : MessageBase {
         public Component component;
-        //public ArrayList targets;
+        public int[] targets = new int [4];
     }
 
     public class Sequence : MessageBase {
         public int index;
         public DisasterType disaster;
-        //public List<ComponentState> components;
+        public ComponentState[] components = new ComponentState[100];
         public int timer;
     }
 
