@@ -31,7 +31,7 @@ public class TableControlsManager : MonoBehaviour
     {
         _instance = this;
         _resetables = new HashSet<IResetable>();
-        
+
         OnSequenceComplete += Received;
     }
 
@@ -39,7 +39,7 @@ public class TableControlsManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.A))
         {
-            SupplySequence(new Sequence(0, DisasterType.Earthquake, 5, 
+            SupplySequence(new Sequence(0, DisasterType.Earthquake, 5,
                 new ComponentState(Messages.Component.Lever, 3)));
         }
         if (Input.GetKeyDown(KeyCode.Space)) CompleteAnswerAndSend();
@@ -157,8 +157,11 @@ public class TableControlsManager : MonoBehaviour
 
     private bool DefendAgainstOverflow(Messages.ComponentState component)
     {
-        StopCoroutine(_componentResetCoroutine);
-        _componentResetCoroutine = null;
+        if (_componentResetCoroutine != null)
+        {
+            StopCoroutine(_componentResetCoroutine);
+            _componentResetCoroutine = null;
+        }
 
         if (component.component != _lastComponent.component)
         {
