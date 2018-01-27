@@ -2,49 +2,15 @@
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using Messages;
 using UnityEngine;
 
-#pragma warning disable 0414
+//#pragma warning disable 0414
 public class TableControlsManager : MonoBehaviour
 {
-    //Always receive a sequence of 2 + n * 3 (where n = Sequence length) integers: 
-    //First Position: Disaster - Volcano(1), Earthquake (2), Missle (3), Tornado(4)
-    //Second Position: Sequence/Symbol Length - integer (around 3 to 6 usually)
-
-    //Every 3 define a symbol:
-    //First Position: Component
-    //Second Position: depending on the component - it's either a subcomponent or a value
-    //Third Position: value (for subcomponent)
-
-    //Component - Component Number Representation 
-    //(Possible Sub Component Number Representation) - Possible Values
-    //Lever -  1 - [0],1,2,3,4
-    //Wheel - 2 - 0..360
-    //Switches - 3 (1..3) - On/Off (True/False - 1/0)
-    //Scrollbar - 4 - 0..100
-    //Sliders - 5 (1..3) - 0..100
-
-    private enum Disaster : int { Volcano = 1, Earthquake = 2, Missle = 3, Tornado = 4 }
-    private enum Component : int { Lever = 1, Wheel = 2, Switches = 3, Scrollbar = 4, Sliders = 5 }
-
-    private Component _lastComponent = 0;
-    private int _lastSubComponent = 0; //if any
+    private Coroutine _componentResetCoroutine = null;
+    private Messages.ComponentState _lastComponent = null;
     private HashSet<IResetable> _resetables = null;
-
-    //private static TableControlsManager _instance = null;
-    //public static TableControlsManager instance
-    //{
-    //    get
-    //    {
-    //        if (_instance == null)
-    //        {
-    //            _instance = new TableControlsManager();
-    //            //_instance._mySequence = new List<int>();
-    //            //_instance._serverSequence = new List<int> { 3, 3, 3, 3, 3 };
-    //        }
-    //        return _instance;
-    //    }
-    //}
 
     private static TableControlsManager _instance = null;
     public static TableControlsManager instance
@@ -53,64 +19,103 @@ public class TableControlsManager : MonoBehaviour
     }
 
     [SerializeField, ReadOnly]
-    private List<int> _serverSequence = null;
+    private Messages.Sequence _serverSequence = null;
     [SerializeField, ReadOnly]
-    private List<int> _mySequence = null;
+    private List<Messages.ComponentState> _mySequence = null;
 
-    //Sequence Cache
-    private int _sequenceLength = -1;
+    public delegate void SequenceComplete(Messages.SequenceComplete completeSequence);
 
-    //Cache
-    private int _leverPosition = -1;
-    private int _wheelAngle = -1;
-    private bool[] _switches = new bool[3] { false, false, false };
-    private int _scrollbar = -1;
-    private int[] _sliders = new int[3] { -1, -1, -1 };
+    public event SequenceComplete OnSequenceComplete;
 
     private void Start()
     {
         _instance = this;
         _resetables = new HashSet<IResetable>();
+        
+        OnSequenceComplete += Received;
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space)) FlushLocalSequence();
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            SupplySequence(new Sequence(0, DisasterType.Earthquake, 5, 
+                new ComponentState(Messages.Component.Lever, 3)));
+        }
+        if (Input.GetKeyDown(KeyCode.Space)) CompleteAnswerAndSend();
+    }
+
+    private void Received(Messages.SequenceComplete obj)
+    {
+        Debug.Log("Received Completed Sequence with result: " + obj.correct.ToString());
     }
 
     #region Sequence Management
-    public string PrintCollection<T>(IEnumerable<T> col)
+
+    public void SupplySequence(Messages.Sequence sequence)
+    {
+        _serverSequence = sequence;
+        _mySequence = new List<Messages.ComponentState>();
+
+        StartCoroutine(Wait(sequence.timer, () => { TimeOutAnswer(true); }));
+    }
+
+    private void CompleteAnswerAndSend(bool flush = true)
+    {
+        Messages.SequenceComplete result =
+            flush ? IsSequenceCorrect_Flush() : IsSequenceCorrect();
+        Debug.Log("Completed answer in time with result: " + result.correct.ToString());
+
+        OnSequenceComplete?.Invoke(result);
+    }
+
+    private string PrintCollection<T>(IEnumerable<T> collection)
     {
         string result = "";
-        foreach (var item in col)
+        foreach (var item in collection)
             result += item.ToString() + ", "; // Replace this with your version of printing
 
         return result;
     }
 
-    public bool SequenceIsCorrect()
+    private Messages.SequenceComplete TimeOut()
     {
-        if (_mySequence.Count < _serverSequence.Count - 2)
-        {
-            Debug.Log("Local Sequence not full.");
-            return false;
-        }
-
-        List<int> localSequence = new List<int>(_mySequence);
-
-        if (_mySequence?.Count != 0)
-        {
-            localSequence.Insert(0, _serverSequence[1]);
-            localSequence.Insert(0, _serverSequence[0]);
-        }
-
-        return localSequence.SequenceEqual(_serverSequence);
+        return new Messages.SequenceComplete(_serverSequence.index, false);
     }
 
-    public void FlushLocalSequence()
+    private Messages.SequenceComplete TimeOut_Flush()
     {
-        _mySequence = new List<int>();
-        _serverSequence = new List<int>();
+        Messages.SequenceComplete result = TimeOut();
+        FlushLocalSequence();
+        return result;
+    }
+
+    private void TimeOutAnswer(bool flush = true)
+    {
+        Messages.SequenceComplete result =
+            flush ? TimeOut_Flush() : TimeOut();
+
+        Debug.Log("Failed to answer in time.");
+        OnSequenceComplete?.Invoke(result);
+    }
+
+    private Messages.SequenceComplete IsSequenceCorrect()
+    {
+        if (_mySequence.Count < _serverSequence.components.Length)
+        {
+            Debug.Log("Local Sequence not full.");
+            return new Messages.SequenceComplete(_serverSequence.index, false);
+        }
+
+        bool correct = _mySequence.SequenceEqual(_serverSequence.components);
+
+        return new Messages.SequenceComplete(_serverSequence.index, correct);
+    }
+
+    private void FlushLocalSequence()
+    {
+        _mySequence = null;
+        _serverSequence = null;
 
         foreach (IResetable resetable in _resetables)
             resetable.Reset();
@@ -119,42 +124,25 @@ public class TableControlsManager : MonoBehaviour
         Debug.Log("Flushed local and server sequence. (Client-side Cache)");
     }
 
-    public bool GetIfSequenceIsCorrectAndFlush()
+    private Messages.SequenceComplete IsSequenceCorrect_Flush()
     {
-        bool result = SequenceIsCorrect();
+        var result = IsSequenceCorrect();
         FlushLocalSequence();
         return result;
     }
 
-    public void SupplySequence(List<int> sequence)
+    private void Log(Messages.ComponentState loggedComponent)
     {
-        _serverSequence = sequence;
-        _mySequence = new List<int>();
+        if (DefendAgainstOverflow(loggedComponent)) return;
 
-        _sequenceLength = sequence.Count;
-        //_sequenceCounter = 0;
-    }
-
-    public void SupplySequence(int[] sequence)
-    {
-        _serverSequence = new List<int>(sequence);
-        _mySequence = new List<int>();
-
-        _sequenceLength = sequence.Length;
-        //_sequenceCounter = 0;
-    }
-
-    public void Log(params int[] list)
-    {
-        Component component = (Component)list[0];
-        if (DefendAgainstOverflow(list, component)) return;
-
-        _lastComponent = component;
-        _mySequence.AddRange(list);
-        if (_mySequence.Count >= _serverSequence.Count)
+        _lastComponent = loggedComponent;
+        _mySequence.Add(loggedComponent);
+        if (_mySequence.Count >= _serverSequence.components.Length)
         {
-            //Debug.Log("My Sequence Full");
-            throw new NotImplementedException("My Sequence Full");
+            Debug.Log("My Sequence Full. Getting Correct Answer.");
+
+            CompleteAnswerAndSend(true);
+            //throw new NotImplementedException("My Sequence Full");
         }
 
         //Debug.Log(_mySequence.ToString());
@@ -167,48 +155,19 @@ public class TableControlsManager : MonoBehaviour
         action();
     }
 
-    private bool DefendAgainstOverflow(int[] list, Component component)
+    private bool DefendAgainstOverflow(Messages.ComponentState component)
     {
-        StopAllCoroutines();
+        StopCoroutine(_componentResetCoroutine);
+        _componentResetCoroutine = null;
 
-        if (component != _lastComponent)
+        if (component.component != _lastComponent.component)
         {
             return false;
         }
-        
-        StartCoroutine(Wait(2, () => { _lastComponent = 0; }));
 
-        switch (component)
-        {
-            case Component.Lever:
-            case Component.Scrollbar:
-            case Component.Wheel:
-                {
-                    _mySequence[_mySequence.Count - 1] = list[1];
-                    Debug.Log(PrintCollection(_mySequence));
-                    return true;
-                }
-            case Component.Switches:
-            case Component.Sliders:
-                {
-                    if (_lastSubComponent == list[1])
-                    {
-                        _mySequence[_mySequence.Count - 1] = list[2];
+        _componentResetCoroutine = StartCoroutine(Wait(2, () => { _lastComponent = null; }));
 
-                        Debug.Log(PrintCollection(_mySequence));
-                        return true;
-                    }
-
-                    _lastSubComponent = list[1];
-                    break;
-                }
-            default:
-                {
-                    Debug.Log("Unexpected component type: " + list[0]);
-                    break;
-                }
-        }
-
+        _mySequence[_mySequence.Count - 1] = component;
 
         return false;
     }
@@ -224,24 +183,24 @@ public class TableControlsManager : MonoBehaviour
 
     public void SetLever(int position)
     {
-        _leverPosition = position;
+        //_leverPosition = position;
 
-        Log((int)Component.Lever, position);
+        Log(new Messages.ComponentState(Messages.Component.Lever, position));
     }
 
     public void SetWheel(float angle, bool radians = false)
     {
         if (radians) angle *= Mathf.Rad2Deg;
-        _wheelAngle = (int)angle;
+        int wheelAngle = (int)angle;
 
-        Log((int)Component.Wheel, _wheelAngle);
+        Log(new Messages.ComponentState(Messages.Component.Wheel, wheelAngle));
     }
 
     public void SetScrollwheel(float scroll)
     {
-        _scrollbar = (int)(scroll * 100);
+        int scrollbar = (int)(scroll * 100);
 
-        Log((int)Component.Scrollbar, _scrollbar);
+        Log(new Messages.ComponentState(Messages.Component.Scroll, scrollbar));
     }
 
     public void SetSwitch(int position, bool switchValue = false)
@@ -249,9 +208,9 @@ public class TableControlsManager : MonoBehaviour
         if (position < 1 && position > 3)
             throw new InvalidOperationException
                 ("Input Switch Position out of range (0..2).");
-        _switches[position - 1] = switchValue;
+        //_switches[position - 1] = switchValue;
 
-        Log((int)Component.Switches, position, Convert.ToInt32(switchValue));
+        Log(new Messages.ComponentState(Messages.Component.Switches, position, Convert.ToInt32(switchValue)));
     }
 
     public void SetSlider(int position, float sliderValue = 0)
@@ -263,48 +222,12 @@ public class TableControlsManager : MonoBehaviour
             throw new InvalidOperationException
                 ("Input Slider Value out of range (0..1).");
 
-        _sliders[position - 1] = (int)(sliderValue * 100);
+        //_sliders[position - 1] = (int)(sliderValue * 100);
 
-        Log((int)Component.Sliders, position, (int)(sliderValue * 100));
+        Log(new Messages.ComponentState(Messages.Component.Sliders, position, (int)(sliderValue * 100)));
     }
 
     #region old
-    //public void SetSwitchesInfo(bool[] switchInfo)
-    //{
-    //    bool[] info = new bool[3] { false, false, false };
-    //    Array.Copy(switchInfo, info, 3);
-
-    //    _switches = info;
-    //    //bool[] info = new bool[3](switchInfo);
-    //}
-
-    //public void SetSwitchesInfo(
-    //    bool switch1 = false, 
-    //    bool switch2 = false,
-    //    bool switch3 = false)
-    //{
-    //    _switches[0] = switch1;
-    //    _switches[1] = switch2;
-    //    _switches[2] = switch3;
-    //}
-
-    //public void SetSliders(int[] slidersInfo)
-    //{
-    //    int[] info = new int[3] { -1, -1, -1 };
-    //    Array.Copy(slidersInfo, info, 3);
-
-    //    _sliders = info;
-    //}
-
-    //public void SetSliders(
-    //    int slider1 = -1,
-    //    int slider2 = -1,
-    //    int slider3 = -1)
-    //{
-    //    _sliders[0] = slider1;
-    //    _sliders[1] = slider2;
-    //    _sliders[2] = slider3;
-    //}
     #endregion
     #endregion
 }
