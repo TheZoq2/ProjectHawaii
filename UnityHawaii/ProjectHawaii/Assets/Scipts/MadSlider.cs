@@ -25,6 +25,8 @@ public class MadSlider : MonoBehaviour
     public void SetIsland(int id)
     {
         var tarPos = _points[id].position;
+
+        print(" cur id: " + currentId);
         if (currentId == 0)
         {
             var firstPos = tarPos;
@@ -49,8 +51,8 @@ public class MadSlider : MonoBehaviour
             }
         }
 
-        TableControlsManager.instance.SetLever(id);
         currentId = id;
+        TableControlsManager.instance.SetLever(id);
     }
 
 
