@@ -35,12 +35,13 @@ public class ScrollbarInfo : MonoBehaviour, IResetable
 
     private IEnumerator UntilComplete()
     {
-        while (true)
+        float old = _scrollbar.value;
+        while ((_scrollbar.value =
+                   Mathf.MoveTowards(old, 0, 0.1f)) - old > Mathf.Epsilon)
         {
-            float old = _scrollbar.value;
-            if ((_scrollbar.value =
-                    Mathf.MoveTowards(old, 0, 0.1f)) - old > float.Epsilon)
-                yield return null;
+            Debug.Log("Trying to get home.");
+            old = _scrollbar.value;
+            yield return null;
         }
     }
 }

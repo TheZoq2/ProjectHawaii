@@ -136,7 +136,8 @@ public class TableControlsManager : MonoBehaviour
 
     private void Log(Messages.ComponentState loggedComponent)
     {
-        if (DefendAgainstOverflow(loggedComponent)) return;
+        if (_lastComponent != null &&
+            DefendAgainstOverflow(loggedComponent)) return;
 
         _lastComponent = loggedComponent;
         _mySequence.Add(loggedComponent);
@@ -175,7 +176,7 @@ public class TableControlsManager : MonoBehaviour
 
         _mySequence[_mySequence.Count - 1] = component;
 
-        return false;
+        return true;
     }
 
     #endregion
@@ -191,7 +192,7 @@ public class TableControlsManager : MonoBehaviour
     {
         //_leverPosition = position;
 
-        Log(new Messages.ComponentState(Messages.Component.Lever, position));
+        Log(new ComponentState(Messages.Component.Lever, position));
     }
 
     public void SetWheel(float angle, bool radians = false)
@@ -199,7 +200,7 @@ public class TableControlsManager : MonoBehaviour
         if (radians) angle *= Mathf.Rad2Deg;
         int wheelAngle = (int)angle;
 
-        Log(new Messages.ComponentState(Messages.Component.Wheel, wheelAngle));
+        Log(new ComponentState(Messages.Component.Wheel, wheelAngle));
     }
 
     public void SetScrollwheel(float scroll)

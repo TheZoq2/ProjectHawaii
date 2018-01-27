@@ -50,12 +50,11 @@ public class MadSlider : MonoBehaviour, IResetable
                     OnComplete(() => _mover.DOMove(tarPos, _oneMoveTime)));
             }
         }
-        
+        currentId = id;
+
         TableControlsManager.instance.SetLever(id);
         TableControlsManager.instance.AddResetable(this);
 
-        currentId = id;
-        TableControlsManager.instance.SetLever(id);
     }
 
 
