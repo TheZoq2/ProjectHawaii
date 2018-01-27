@@ -25,6 +25,8 @@ public class MadSlider : MonoBehaviour, IResetable
     public void SetIsland(int id)
     {
         var tarPos = _points[id].position;
+
+        print(" cur id: " + currentId);
         if (currentId == 0)
         {
             var firstPos = tarPos;
@@ -48,10 +50,12 @@ public class MadSlider : MonoBehaviour, IResetable
                     OnComplete(() => _mover.DOMove(tarPos, _oneMoveTime)));
             }
         }
-
+        
         TableControlsManager.instance.SetLever(id);
         TableControlsManager.instance.AddResetable(this);
+
         currentId = id;
+        TableControlsManager.instance.SetLever(id);
     }
 
 
