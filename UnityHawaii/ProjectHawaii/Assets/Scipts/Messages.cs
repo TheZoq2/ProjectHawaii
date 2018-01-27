@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -13,7 +14,8 @@ namespace Messages {
         Vulcano,
         Earthquake,
         Missle,
-        Tornado
+        Tornado,
+        Total
     }
 
     public enum Component {
