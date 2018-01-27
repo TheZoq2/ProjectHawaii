@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Messages;
 
-public class Client : MonoBehaviour {
+public class GameClient : MonoBehaviour {
     NetworkClient client;
 
     bool isConnected = false;
@@ -28,10 +28,11 @@ public class Client : MonoBehaviour {
     {
         Debug.Log("Connected to Server");
 
-        var message = new TestMessage();
-        message.message = "Your mom";
+        var message = new SequenceComplete();
+        message.correct = true;
+        message.index = 5;
 
-        client.Send(888, message);
+        client.Send(MessageType.SequenceComplete, message);
 
         isConnected = true;
     }

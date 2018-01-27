@@ -5,13 +5,12 @@ using UnityEngine;
 using Messages;
 
 
-public class Server : MonoBehaviour {
+public class GameServer : MonoBehaviour {
 
     bool isAtStartup = false;
 
-    public void SetupServer()
-    {
-        NetworkServer.RegisterHandler(888, On888);
+    public void SetupServer() {
+        NetworkServer.RegisterHandler(MessageType.SequenceComplete, OnSequenceComplete);
         NetworkServer.Listen(4444);
     }
 
@@ -32,12 +31,8 @@ public class Server : MonoBehaviour {
         SetupServer();
     }
 
-    void On888(NetworkMessage msg) {
-        var sentMessage = msg.ReadMessage<TestMessage>();
-        Debug.Log("got test message" + sentMessage.message);
-    }
-
-    List<ComponentMessage> GenerateSequence() {
-        
+    void OnSequenceComplete(NetworkMessage msg) {
+        var sentMessage = msg.ReadMessage<SequenceComplete>();
+        Debug.Log("Got sequence complete message: " + sentMessage.correct);
     }
 }

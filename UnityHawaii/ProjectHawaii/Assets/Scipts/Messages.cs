@@ -4,10 +4,11 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Messages {
-    public enum MessageType {
-        ComponentMessage,
-        SequenceComplete
+    public static class MessageType {
+        public static short SequenceStart = 100;
+        public static short SequenceComplete = 101;
     }
+
     public enum DisasterType {
         Vulcano,
         Earthquake,
@@ -23,11 +24,21 @@ namespace Messages {
         Sliders
     }
 
-    public class ComponentMessage : MessageBase {
-        public DisasterType disaster;
-        public int lengthOfComponents;
+    public class ComponentState : MessageBase {
         public Component component;
-        public int componentState;
-        public int actionId;
+        //public ArrayList targets;
+    }
+
+    public class Sequence : MessageBase {
+        public int index;
+        public DisasterType disaster;
+        //public List<ComponentState> components;
+        public int timer;
+    }
+
+
+    public class SequenceComplete : MessageBase {
+        public int index;
+        public bool correct;
     }
 }
