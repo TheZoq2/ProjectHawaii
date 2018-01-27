@@ -6,7 +6,7 @@ using DG.Tweening;
 using UnityEngine.Events;
 
 [ExecuteInEditMode]
-public class MadSlider : MonoBehaviour
+public class MadSlider : MonoBehaviour, IResetable
 {
 
     [SerializeField]
@@ -50,6 +50,9 @@ public class MadSlider : MonoBehaviour
                     OnComplete(() => _mover.DOMove(tarPos, _oneMoveTime)));
             }
         }
+        
+        TableControlsManager.instance.SetLever(id);
+        TableControlsManager.instance.AddResetable(this);
 
         currentId = id;
         TableControlsManager.instance.SetLever(id);
@@ -72,5 +75,35 @@ public class MadSlider : MonoBehaviour
 
             point.anchoredPosition = pos;
         }
+    }
+
+    public void Reset()
+    {
+        var tarPos = _points[0].position;
+        if (currentId == 0)
+        {
+            var firstPos = tarPos;
+            firstPos.y = _mover.position.y;
+            _mover.DOMove(firstPos, _oneMoveTime).OnComplete(() => _mover.DOMove(tarPos, _oneMoveTime));
+        }
+        else
+        {
+            if (tarPos.x == _mover.position.x)
+            {
+                _mover.DOMove(tarPos, 1f);
+            }
+            else
+            {
+                var firstPos = _mover.position;
+                firstPos.y = _points[0].position.y;
+                var secPos = tarPos;
+                secPos.y = _points[0].position.y;
+                _mover.DOMove(firstPos, _oneMoveTime).
+                    OnComplete(() => _mover.DOMove(secPos, _oneMoveTime).
+                        OnComplete(() => _mover.DOMove(tarPos, _oneMoveTime)));
+            }
+        }
+        
+        currentId = 0;
     }
 }

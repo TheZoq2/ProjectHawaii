@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SliderInfo : MonoBehaviour
+public class SliderInfo : MonoBehaviour, IResetable
 {
 
     [SerializeField]
@@ -22,5 +22,22 @@ public class SliderInfo : MonoBehaviour
     private void PassInfoIntoSingleton(float f)
     {
         TableControlsManager.instance.SetSlider(_position, _slider.value);
+        TableControlsManager.instance.AddResetable(this);
+    }
+
+    public void Reset()
+    {
+        StartCoroutine(UntilComplete());
+    }
+
+    private IEnumerator UntilComplete()
+    {
+        while (true)
+        {
+            float old = _slider.value;
+            if ((_slider.value =
+                    Mathf.MoveTowards(old, 0, 0.1f)) - old < float.Epsilon)
+                yield return null;
+        }
     }
 }

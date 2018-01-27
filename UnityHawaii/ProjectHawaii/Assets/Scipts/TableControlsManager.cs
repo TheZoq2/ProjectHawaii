@@ -29,6 +29,7 @@ public class TableControlsManager : MonoBehaviour
 
     private Component _lastComponent = 0;
     private int _lastSubComponent = 0; //if any
+    private HashSet<IResetable> _resetables = null;
 
     //private static TableControlsManager _instance = null;
     //public static TableControlsManager instance
@@ -51,11 +52,6 @@ public class TableControlsManager : MonoBehaviour
         get { return _instance; }
     }
 
-    private void Start()
-    {
-        _instance = this;
-    }
-
     [SerializeField, ReadOnly]
     private List<int> _serverSequence = null;
     [SerializeField, ReadOnly]
@@ -71,16 +67,16 @@ public class TableControlsManager : MonoBehaviour
     private int _scrollbar = -1;
     private int[] _sliders = new int[3] { -1, -1, -1 };
 
-    //private List<SeqAction> DeserializeServerSequence(List<int> serverSequence)
-    //{
-    //    for (int i = 2; i < serverSequence.Count; i += 3)
-    //    {
+    private void Start()
+    {
+        _instance = this;
+        _resetables = new HashSet<IResetable>();
+    }
 
-    //    }
-
-    //    return null;
-    //}
-
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space)) FlushLocalSequence();
+    }
 
     #region Sequence Management
     public string PrintCollection<T>(IEnumerable<T> col)
@@ -115,6 +111,10 @@ public class TableControlsManager : MonoBehaviour
     {
         _mySequence = new List<int>();
         _serverSequence = new List<int>();
+
+        foreach (IResetable resetable in _resetables)
+            resetable.Reset();
+        _resetables = new HashSet<IResetable>();
 
         Debug.Log("Flushed local and server sequence. (Client-side Cache)");
     }
@@ -216,6 +216,12 @@ public class TableControlsManager : MonoBehaviour
     #endregion
 
     #region Public Receiver Functions
+
+    public void AddResetable(IResetable resetable)
+    {
+        _resetables.Add(resetable);
+    }
+
     public void SetLever(int position)
     {
         _leverPosition = position;
