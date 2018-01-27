@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using Messages;
+using System.Linq;
 
 public class GameClient : MonoBehaviour {
     NetworkClient client;
@@ -21,6 +22,7 @@ public class GameClient : MonoBehaviour {
     {
         client = new NetworkClient();
         client.RegisterHandler(MsgType.Connect, OnConnected);
+        client.RegisterHandler(MessageType.SequenceStart, OnSequenceStart);
         client.Connect("localhost", 4444);
     }
 
@@ -28,13 +30,17 @@ public class GameClient : MonoBehaviour {
     {
         Debug.Log("Connected to Server");
 
+        SendCompleteMessage();
+
+        isConnected = true;
+    }
+
+    void SendCompleteMessage() {
         var message = new SequenceComplete();
         message.correct = true;
         message.index = 5;
 
         client.Send(MessageType.SequenceComplete, message);
-
-        isConnected = true;
     }
 
     void OnMouseDown() {
@@ -43,5 +49,11 @@ public class GameClient : MonoBehaviour {
         if(!isConnected) {
             SetupClient();
         }
+    }
+
+    void OnSequenceStart(NetworkMessage msg) {
+        var sequence = msg.ReadMessage<Sequence>();
+        Debug.Log("Disaster type: " + sequence.disaster.ToString());
+        Debug.Log("Components: " + sequence.components.Length.ToString());
     }
 }

@@ -18,10 +18,11 @@ namespace Messages
         Vulcano,
         Earthquake,
         Missle,
-        Tornado
+        Tornado,
+        Total
     }
 
-    public enum Component
+    public enum Component : int
     {
         Lever,
         Wheel,
