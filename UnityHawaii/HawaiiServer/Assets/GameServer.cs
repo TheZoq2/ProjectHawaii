@@ -9,6 +9,7 @@ using System.Timers;
 public class GameServer : MonoBehaviour {
 
     bool isAtStartup = false;
+    public int clientAmount;
 
     public void SetupServer() {
         NetworkServer.RegisterHandler(MessageType.SequenceComplete, OnSequenceComplete);
@@ -76,7 +77,7 @@ public class GameServer : MonoBehaviour {
             index = Random.Range(0,1000000),
             disaster = (DisasterType) Random.Range(0, (int) DisasterType.Total),
             components = components.ToArray(),
-            timer = 0
+            timer = Random.Range(5,10),
          };
     }
 

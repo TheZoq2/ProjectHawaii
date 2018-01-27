@@ -10,8 +10,14 @@ public class GameClient : MonoBehaviour {
 
     bool isConnected = false;
 
+    public TableControlsManager tableControlManager;
+    public string url;
+    public int port;
+    public int id;
+
     // Use this for initialization
     void Start () {
+        SetupClient();
     }
 
     // Update is called once per frame
@@ -23,7 +29,7 @@ public class GameClient : MonoBehaviour {
         client = new NetworkClient();
         client.RegisterHandler(MsgType.Connect, OnConnected);
         client.RegisterHandler(MessageType.SequenceStart, OnSequenceStart);
-        client.Connect("localhost", 2000);
+        client.Connect(url, port);
     }
 
     public void OnConnected(NetworkMessage rMessage)
@@ -53,7 +59,8 @@ public class GameClient : MonoBehaviour {
 
     void OnSequenceStart(NetworkMessage msg) {
         var sequence = msg.ReadMessage<Sequence>();
-        Debug.Log("Disaster type: " + sequence.disaster.ToString());
-        Debug.Log("Components: " + sequence.components.Length.ToString());
+        // Debug.Log("Disaster type: " + sequence.disaster.ToString());
+        // Debug.Log("Components: " + sequence.components.Length.ToString());
+        tableControlManager.SupplySequence(sequence);
     }
 }

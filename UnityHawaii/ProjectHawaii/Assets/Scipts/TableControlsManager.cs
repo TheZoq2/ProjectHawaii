@@ -37,11 +37,11 @@ public class TableControlsManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            SupplySequence(new Sequence(0, DisasterType.Earthquake, 5,
-                new ComponentState(Messages.Component.Lever, 3)));
-        }
+        // if (Input.GetKeyDown(KeyCode.A))
+        // {
+        //     SupplySequence(new Sequence(0, DisasterType.Earthquake, 5,
+        //         new ComponentState(Messages.Component.Lever, 3)));
+        // }
         if (Input.GetKeyDown(KeyCode.Space)) CompleteAnswerAndSend();
     }
 
@@ -56,6 +56,9 @@ public class TableControlsManager : MonoBehaviour
     {
         _serverSequence = sequence;
         _mySequence = new List<Messages.ComponentState>();
+
+        print("Got supply sequence");
+        print("Sequence timeout: " + sequence.timer);
 
         StartCoroutine(Wait(sequence.timer, () => { TimeOutAnswer(true); }));
     }
