@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Messages {
+    public enum MessageType {
+        ComponentMessage,
+        SequenceComplete
+    }
     public enum DisasterType {
         Vulcano,
         Earthquake,
