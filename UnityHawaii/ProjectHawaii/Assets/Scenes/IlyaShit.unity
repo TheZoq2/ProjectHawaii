@@ -169,8 +169,8 @@ MonoBehaviour:
   - {fileID: 266874559}
   - {fileID: 711045729}
   - {fileID: 1444630319}
-  - {fileID: 1420190701}
   - {fileID: 767626664}
+  - {fileID: 1420190701}
   _mover: {fileID: 2053141388}
   _oneMoveTime: 0.3
   _widthDelta: 15
@@ -350,7 +350,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 4
+          m_IntArgument: 3
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -1456,7 +1456,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 3
+          m_IntArgument: 4
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
