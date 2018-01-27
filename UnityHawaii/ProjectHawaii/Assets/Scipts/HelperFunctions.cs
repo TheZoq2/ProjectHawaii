@@ -16,17 +16,15 @@ public class HelperFunctions : MonoBehaviour {
 
     public static string ParseColorToString(Color color)
     {
-        switch (color.ToString())
-        {
-            case "RGBA(1.000, 0.000, 0.000, 1.000)":
-                return "Red";
-            case "RGBA(0.000, 1.000, 0.000, 1.000)":
-                return "Green";
-            case "RGBA(0.000, 0.000, 1.000, 1.000)":
-                return "Blue";
-            case "RGBA(1.000, 0.922, 0.016, 1.000)":
-                return "Yellow";
-        }
+        if (color == Color.blue)
+            return "Blue";
+        if (color == Color.green)
+            return "Green";
+        if (color == Color.yellow)
+            return "Yellow";
+        if (color == Color.red)
+            return "Red";
+
         return "";
     }
 }

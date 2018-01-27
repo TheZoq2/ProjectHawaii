@@ -19,7 +19,7 @@ public class WarningMovementScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gameObject.transform.position.x > SequenceOrder * _rectTransform.rect.width + _rectTransform.rect.width/2)
+        if (gameObject.transform.position.x > SequenceOrder * _rectTransform.rect.size.x + 80/2 + 20)
             gameObject.transform.Translate(Vector3.left * 5);
     }
 

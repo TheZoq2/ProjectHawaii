@@ -16,14 +16,9 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
     public float CurrentRotation = 0;
     private bool isRotating = false;
 
-    public Text text;
-    public LedScript led;
     public UnityEvent onValueChange;
 
-    // Use this for initialization
-    void Start () {
-        text.text = "0";
-	}
+ 
 	
 	// Update is called once per frame
 	void Update () {
@@ -36,12 +31,12 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         {
             if (transform.localRotation.eulerAngles.z  > wheelRotationGoal - GoalPrecision && 
                 transform.localRotation.eulerAngles.z  < wheelRotationGoal + GoalPrecision)
-            {
-                led.LightUp();
+            { 
+                //on
             }
             else
             {
-                led.LightOff();
+                //off
             }
         }
     }
@@ -66,7 +61,7 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - wheelAngle ;
         transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         CurrentRotation = transform.localRotation.eulerAngles.z;
-        text.text = CurrentRotation.ToString();
+        //text.text = CurrentRotation.ToString();
         onValueChange.Invoke();
     }
 
