@@ -4,7 +4,30 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Messages {
-    public class TestMessage : MessageBase {
-        public string message;
+    public enum MessageType {
+        ComponentMessage,
+        SequenceComplete
+    }
+    public enum DisasterType {
+        Vulcano,
+        Earthquake,
+        Missle,
+        Tornado
+    }
+
+    public enum Component {
+        Lever,
+        Wheel,
+        Switches,
+        Scroll,
+        Sliders
+    }
+
+    public class ComponentMessage : MessageBase {
+        public DisasterType disaster;
+        public int lengthOfComponents;
+        public Component component;
+        public int componentState;
+        public int actionId;
     }
 }

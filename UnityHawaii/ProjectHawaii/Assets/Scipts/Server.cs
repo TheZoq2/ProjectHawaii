@@ -4,6 +4,7 @@ using UnityEngine.Networking;
 using UnityEngine;
 using Messages;
 
+
 public class Server : MonoBehaviour {
 
     bool isAtStartup = false;
@@ -20,10 +21,10 @@ public class Server : MonoBehaviour {
         //SetupServer();
 
     }
-    
+
     // Update is called once per frame
     void Update () {
-        
+
     }
 
     void OnMouseDown() {
@@ -32,6 +33,11 @@ public class Server : MonoBehaviour {
     }
 
     void On888(NetworkMessage msg) {
-        Debug.Log("got test message");
+        var sentMessage = msg.ReadMessage<TestMessage>();
+        Debug.Log("got test message" + sentMessage.message);
+    }
+
+    List<ComponentMessage> GenerateSequence() {
+        
     }
 }

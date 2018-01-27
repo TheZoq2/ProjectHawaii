@@ -44,13 +44,6 @@ MonoBehaviour:
   wheelRotationGoal: 90
   GoalPrecision: 10
   CurrentRotation: 0
-  text: {fileID: 0}
-  led: {fileID: 0}
-  onValueChange:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
 --- !u!114 &114856474581551024
 MonoBehaviour:
   m_ObjectHideFlags: 1
