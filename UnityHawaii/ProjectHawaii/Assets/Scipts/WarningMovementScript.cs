@@ -9,24 +9,6 @@ public class WarningMovementScript : MonoBehaviour
 {
     public int SequenceOrder { get; set; }
 
-    private RectTransform _rectTransform;
-    // Use this for initialization
-    void Start()
-    {
-        _rectTransform = GetComponent<RectTransform>();
-    }
-        
-    // Update is called once per frame
-    void Update()
-    {
-        if (gameObject.transform.position.x > SequenceOrder * _rectTransform.rect.size.x + 80/2 + 20)
-            gameObject.transform.Translate(Vector3.left * 5);
-    }
-
-    void OnMouseDown()
-    {
-    }
-
     public void Clicked()
     {
         Statics.Warnings.ForEach(g =>

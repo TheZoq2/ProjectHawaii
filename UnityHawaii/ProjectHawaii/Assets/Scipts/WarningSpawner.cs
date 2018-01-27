@@ -42,11 +42,12 @@ namespace Assets.Scripts
         public void SpawnAWarning()
         {
             GameObject g = Instantiate(Prefab, GameObject.FindGameObjectWithTag("WarningPanel").transform);
-            g.transform.localPosition = new Vector3(400, 0);
+
             var script = g.GetComponent<WarningMovementScript>();
 
             script.SequenceOrder = Statics.Warnings.Count + 1;
             script.SetCalamity(_calamities[Mathf.FloorToInt(Random.Range(0, 4))]);
+
             Statics.Warnings.Add(g);
             EventManager.CalamitiesChanged();
         }
