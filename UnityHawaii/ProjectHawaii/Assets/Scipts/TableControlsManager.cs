@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 #pragma warning disable 0414
-public class TableControlsManager
+public class TableControlsManager : MonoBehaviour
 {
     //Always receive a sequence of 2 + n * 3 (where n = Sequence length) integers: 
     //First Position: Disaster - Volcano(1), Earthquake (2), Missle (3), Tornado(4)
@@ -27,37 +27,39 @@ public class TableControlsManager
     private enum Disaster : int { Volcano = 1, Earthquake = 2, Missle = 3, Tornado = 4 }
     private enum Component : int { Lever = 1, Wheel = 2, Switches = 3, Scrollbar = 4, Sliders = 5 }
 
-    private Component _lastComponent = default(Component);
+    private Component _lastComponent = 0;
     private int _lastSubComponent = 0; //if any
+
+    //private static TableControlsManager _instance = null;
+    //public static TableControlsManager instance
+    //{
+    //    get
+    //    {
+    //        if (_instance == null)
+    //        {
+    //            _instance = new TableControlsManager();
+    //            //_instance._mySequence = new List<int>();
+    //            //_instance._serverSequence = new List<int> { 3, 3, 3, 3, 3 };
+    //        }
+    //        return _instance;
+    //    }
+    //}
 
     private static TableControlsManager _instance = null;
     public static TableControlsManager instance
     {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = new TableControlsManager();
-                //_instance._mySequence = new List<int>();
-                //_instance._serverSequence = new List<int> { 3, 3, 3, 3, 3 };
-            }
-            return _instance;
-        }
+        get { return _instance; }
     }
 
-    //[SerializeField, ReadOnly]
+    private void Start()
+    {
+        _instance = this;
+    }
+
+    [SerializeField, ReadOnly]
     private List<int> _serverSequence = null;
-    //[SerializeField, ReadOnly]
+    [SerializeField, ReadOnly]
     private List<int> _mySequence = null;
-
-    //private struct SeqAction
-    //{
-    //    int component;
-    //    int subComponent;
-    //    int value;
-    //}
-
-    //private List<SeqAction> _sequence = null;
 
     //Sequence Cache
     private int _sequenceLength = -1;
@@ -159,40 +161,54 @@ public class TableControlsManager
         Debug.Log(PrintCollection(_mySequence));
     }
 
+    private IEnumerator Wait(float time, Action action)
+    {
+        yield return new WaitForSeconds(time);
+        action();
+    }
+
     private bool DefendAgainstOverflow(int[] list, Component component)
     {
-        if (component != _lastComponent) return false;
+        StopAllCoroutines();
+
+        if (component != _lastComponent)
+        {
+            return false;
+        }
+        
+        StartCoroutine(Wait(2, () => { _lastComponent = 0; }));
 
         switch (component)
         {
             case Component.Lever:
             case Component.Scrollbar:
             case Component.Wheel:
-            {
-                _mySequence[_mySequence.Count - 1] = list[1];
-                Debug.Log(PrintCollection(_mySequence));
-                return true;
-            }
-            case Component.Switches:
-            case Component.Sliders:
-            {
-                if (_lastSubComponent == list[1])
                 {
-                    _mySequence[_mySequence.Count - 1] = list[2];
-
+                    _mySequence[_mySequence.Count - 1] = list[1];
                     Debug.Log(PrintCollection(_mySequence));
                     return true;
                 }
+            case Component.Switches:
+            case Component.Sliders:
+                {
+                    if (_lastSubComponent == list[1])
+                    {
+                        _mySequence[_mySequence.Count - 1] = list[2];
 
-                _lastSubComponent = list[1];
-                break;
-            }
+                        Debug.Log(PrintCollection(_mySequence));
+                        return true;
+                    }
+
+                    _lastSubComponent = list[1];
+                    break;
+                }
             default:
-            {
-                Debug.Log("Unexpected component type: " + list[0]);
-                break;
-            }
+                {
+                    Debug.Log("Unexpected component type: " + list[0]);
+                    break;
+                }
         }
+
 
         return false;
     }

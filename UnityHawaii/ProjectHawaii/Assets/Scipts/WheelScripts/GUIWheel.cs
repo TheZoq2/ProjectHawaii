@@ -5,7 +5,8 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
-public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler{
+public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
+{
 
     private float wheelAngle;
     private float rollBackTimer = 0;
@@ -15,18 +16,19 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
     public float GoalPrecision = 10;
     public float CurrentRotation = 0;
     private bool isRotating = false;
-	
+
     public Text text;
 
     public UnityEvent onValueChange;
 
     private void Start()
     {
-        text.text = "0.0";
+        if (text != null) text.text = "0.0";
     }
 
     // Update is called once per frame
-    void Update () {
+    void Update()
+    {
         if (rollBackTimer > 0)
         {
             rollBackTimer -= Time.deltaTime;
@@ -34,8 +36,8 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         }
         if (isRotating)
         {
-            if (transform.localRotation.eulerAngles.z  > wheelRotationGoal - GoalPrecision && 
-                transform.localRotation.eulerAngles.z  < wheelRotationGoal + GoalPrecision)
+            if (transform.localRotation.eulerAngles.z > wheelRotationGoal - GoalPrecision &&
+                transform.localRotation.eulerAngles.z < wheelRotationGoal + GoalPrecision)
             {
                 PositionCorrect();
             }
@@ -53,23 +55,23 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         var dir = Input.mousePosition - transform.position;
         wheelAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         wheelAngle -= Mathf.Atan2(transform.right.y, transform.right.x) * Mathf.Rad2Deg;
-        
+
         isRotating = true;
-        
+
     }
-    
+
     public void OnDrag(PointerEventData eventdata)
     {
         float oldRotation = transform.rotation.eulerAngles.z;
 
         Vector3 dir = Input.mousePosition - transform.position;
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - wheelAngle ;
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - wheelAngle;
         transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         CurrentRotation = transform.localRotation.eulerAngles.z;
         //text.text = CurrentRotation.ToString();
-        
+
         TableControlsManager.instance.SetWheel(CurrentRotation);
-        text.text = CurrentRotation.ToString();
+        if (text != null) text.text = CurrentRotation.ToString();
         onValueChange.Invoke();
 
     }
