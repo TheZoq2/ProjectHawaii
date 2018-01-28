@@ -20,6 +20,7 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
 
     public Text text;
     public FadingAudioSource wheelSource;
+    public AudioSource correctPositionSource;
     public UnityEvent onValueChange;
 
     private void Start()
@@ -63,7 +64,7 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
 
     public void OnBeginDrag(PointerEventData eventdata)
     {
-        wheelSource.Play(0.5f);
+        wheelSource.Play(0.3f);
     }
 
     public void OnDrag(PointerEventData eventdata)
@@ -80,7 +81,6 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
         TableControlsManager.Instance.AddResetable(this);
         if (text != null) text.text = CurrentRotation.ToString();
         onValueChange.Invoke();
-
     }
 
     public void OnEndDrag(PointerEventData eventdata)
@@ -96,7 +96,7 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
 
     public void PositionCorrect()
     {
-
+        correctPositionSource.Play();
     }
 
     public void PositionInCorrect()
