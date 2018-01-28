@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Experimental.UIElements;
 using UnityEngine.UI;
 
-public class SwitchButtonInfo : MonoBehaviour
+public class SwitchButtonInfo : MonoBehaviour, IResetable
 {
     [SerializeField]
     private int _position = 0;
@@ -22,5 +22,10 @@ public class SwitchButtonInfo : MonoBehaviour
     private void PassInfoToSingleton(bool b)
     {
         TableControlsManager.instance.SetSwitch(_position, _toggle.isOn);
+    }
+
+    public void Reset()
+    {
+        _toggle.isOn = false;
     }
 }

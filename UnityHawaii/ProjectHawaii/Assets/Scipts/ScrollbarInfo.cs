@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using DG.Tweening;
 
 public class ScrollbarInfo : MonoBehaviour, IResetable
 {
@@ -30,7 +31,12 @@ public class ScrollbarInfo : MonoBehaviour, IResetable
     public void Reset()
     {
         //_scrollbar.value = 0;
-        StartCoroutine(UntilComplete());
+        DOTween.To(() =>
+            _scrollbar.value,
+            value =>
+        { _scrollbar.value = value; },
+            0, 1);
+        //StartCoroutine(UntilComplete());
     }
 
     private IEnumerator UntilComplete()
