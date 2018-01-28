@@ -72,7 +72,7 @@ public class GameClient : MonoBehaviour
         }
     }
 
-    void OnSequenceStart(NetworkMessage msg)
+     void OnSequenceStart(NetworkMessage msg)
     {
         var sequence = msg.ReadMessage<Sequence>();
 
@@ -80,7 +80,7 @@ public class GameClient : MonoBehaviour
         if (sequence.index % 2 == id % 2)
         {
             print("Got sequence to handle");
-            tableControlManager.SupplySequence(sequence);
+            TableControlsManager.SupplyExecutionSequence(sequence);
         }
         else
         {
@@ -100,6 +100,8 @@ public class GameClient : MonoBehaviour
 
             script.WarningImage = warningImage;
             Statics.Panels.Add(panel);
+
+            TableControlsManager.SupplyCommunicationSequence(sequence);
         }
         // Debug.Log("Disaster type: " + sequence.disaster.ToString());
         // Debug.Log("Components: " + sequence.components.Length.ToString());
