@@ -11,3 +11,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/WarningScene.unity
     guid: 6147a981512e3d748a8e2b410076e38c
+  - enabled: 1
+    path: Assets/Scenes/GameOver.unity
+    guid: 667b2c140bc565b40a7076ae55882a95
