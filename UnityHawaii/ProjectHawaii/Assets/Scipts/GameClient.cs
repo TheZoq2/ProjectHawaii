@@ -116,9 +116,6 @@ public class GameClient : MonoBehaviour
             // Add a sequence panel to the holder and a image to the image holder, make sure that these can later be accessed to be deleted/modified
             GameObject holder = GameObject.Find("SequencePanelsHolder");
             //DrawSequence(sequence, holder, true);
-            GameObject panel = Instantiate(_sequencePanelPrefab, holder.transform);
-            panel.name = "CorrectSequencePanel";
-            var script = panel.GetComponent<SequencePanelScript>();
 
             TableControlsManager.SupplyCommunicationSequence(sequence, holder, 
                 _sequencePanelPrefab, _warningImagePrefab, _spriteDictionary);
