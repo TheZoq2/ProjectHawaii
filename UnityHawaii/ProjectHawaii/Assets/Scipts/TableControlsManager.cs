@@ -344,6 +344,7 @@ public class TableControlsManager : MonoBehaviour
     {
         _currentSequenceToCommunicate = MapToSequenceWithQueue(sequence);
         //Debug.Log(_currentSequenceToCommunicate);
+        if (_cleaners != null) _cleaners = new List<SequencePanelScript>();
         ResetSequencePanels();
         var fakeSequences = GenerateSequencePanels(sequence);
 
@@ -361,7 +362,7 @@ public class TableControlsManager : MonoBehaviour
         //throw new NotImplementedException();
         foreach (SequencePanelScript cleaner in _cleaners)
             while (cleaner != null) cleaner.PopPanel(true);
-        _cleaners = null;
+        _cleaners = new List<SequencePanelScript>();
     }
 
     private static SequencePanelScript DrawSequence(
