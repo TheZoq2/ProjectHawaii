@@ -56,13 +56,22 @@ namespace Messages
             //return x.targets.SequenceEqual(y.targets);
 
             //Linq version - also works
-            return !x.targets.Where((t, i) => Mathf.Abs(t - y.targets[i]) > 10).Any();
+            //return !x.targets.Where((t, i) => Mathf.Abs(t - y.targets[i]) > 10).Any();
 
             //Works - but more understandable
-            //for (int i = 0; i < x.targets.Length; i++)
-            //    if (Mathf.Abs(x.targets[i] - y.targets[i]) > 10) return false;
+            if (x.component == Component.Scroll ||
+                x.component == Component.Wheel ||
+                x.component == Component.Sliders)
+            {
+                for (int i = 0; i < x.targets.Length; i++)
+                {
+                    if (Mathf.Abs(x.targets[i] - y.targets[i]) > 15)
+                        return false;
+                }
+            }
+            else return x.targets.SequenceEqual(y.targets);
 
-            //return true;
+            return true;
         }
 
         public int GetHashCode(ComponentState obj)
@@ -120,7 +129,5 @@ namespace Messages
 
     public class ComponentComplete : MessageBase {
     }
-    public class NotifyComponentComplete : MessageBase {
-        
-    }
+    public class NotifyComponentComplete : MessageBase {}
 }
