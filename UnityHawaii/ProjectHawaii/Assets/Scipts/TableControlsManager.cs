@@ -346,15 +346,15 @@ public class TableControlsManager : MonoBehaviour
         //Debug.Log(_currentSequenceToCommunicate);
         if (_cleaners == null) _cleaners = new List<SequencePanelScript>();
         ResetSequencePanels();
-        var fakeSequences = GenerateSequencePanels(sequence);
+        //var fakeSequences = GenerateSequencePanels(sequence);
 
         _cleaners.Add(DrawSequence(sequence, holder, sequencePanelPrefab,
             warningImagePrefab, spriteDictionary, true)
         );
 
-        foreach (Sequence fakeSequence in fakeSequences)
-            _cleaners.Add(DrawSequence(fakeSequence, holder, sequencePanelPrefab,
-                warningImagePrefab, spriteDictionary, true));
+        //foreach (Sequence fakeSequence in fakeSequences)
+        //    _cleaners.Add(DrawSequence(fakeSequence, holder, sequencePanelPrefab,
+        //        warningImagePrefab, spriteDictionary, true));
     }
 
     private static void ResetSequencePanels()
