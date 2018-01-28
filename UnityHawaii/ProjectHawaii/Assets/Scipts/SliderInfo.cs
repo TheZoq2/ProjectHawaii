@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class SliderInfo : MonoBehaviour, IResetable
 {
@@ -27,7 +28,13 @@ public class SliderInfo : MonoBehaviour, IResetable
 
     public void Reset()
     {
-        StartCoroutine(UntilComplete());
+        //StartCoroutine(UntilComplete());
+
+        DOTween.To(() =>
+                _slider.value,
+            value =>
+            { _slider.value = value; },
+            0, 1);
     }
 
     private IEnumerator UntilComplete()
