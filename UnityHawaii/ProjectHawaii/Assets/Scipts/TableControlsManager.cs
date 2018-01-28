@@ -65,10 +65,14 @@ public class TableControlsManager : MonoBehaviour
     {
         if (_currentSequenceToExecute.Components.Count == 0)
         {
-            SequenceCompleted();
             return;
         }
         _currentSequenceToExecute.Components.Dequeue();
+        if (_currentSequenceToExecute.Components.Count == 0)
+        {
+            SequenceCompleted();
+            return;
+        }
         //Panel.RemoveFirstItem();
         ReadNextSequenceItem();
     }
@@ -109,7 +113,7 @@ public class TableControlsManager : MonoBehaviour
     {
         int scrollbar = (int)((1 - scroll) * 100);
 
-        if (Mathf.Abs(scrollbar - _currentSequenceToExecute.Components.Peek().targets[0]) < 5)
+        if (Mathf.Abs(scrollbar - _currentSequenceToExecute.Components.Peek().targets[0]) < 12)
             EventManager.SequenceItemCompleted();
 
         //Log(new ComponentState(Messages.Component.Scroll, scrollbar));
