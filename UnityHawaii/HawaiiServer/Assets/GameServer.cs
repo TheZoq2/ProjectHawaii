@@ -42,7 +42,8 @@ public class GameServer : MonoBehaviour {
         var connectionId = msg.conn.connectionId;
 
         if(sequenceLengths[connectionId] <= 1) {
-            sendNewSequenceToAllClients();
+            //sendNewSequenceToAllClients();
+            sendSequence(connectionId, generateSequence());
         }
         else {
             sequenceLengths[connectionId]--;
@@ -67,6 +68,7 @@ public class GameServer : MonoBehaviour {
     }
 
     void sendNewSequenceToAllClients() {
+        print("Sending sequence to all clients");
         if(clients.Count == 2) {
             sendSequence(clients[0], generateSequence());
             sendSequence(clients[1], generateSequence());
