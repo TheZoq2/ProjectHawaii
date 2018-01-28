@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
-public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler,
+public class GUIWheel : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler,
     IPointerUpHandler, IResetable
 {
 
@@ -19,7 +19,8 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private bool isRotating = false;
 
     public Text text;
-
+    public FadingAudioSource wheelSource;
+    public AudioSource correctPositionSource;
     public UnityEvent onValueChange;
 
     private void Start()
@@ -61,6 +62,11 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     }
 
+    public void OnBeginDrag(PointerEventData eventdata)
+    {
+        wheelSource.Play(0.3f);
+    }
+
     public void OnDrag(PointerEventData eventdata)
     {
         float oldRotation = transform.rotation.eulerAngles.z;
@@ -75,7 +81,11 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler,
         TableControlsManager.Instance.AddResetable(this);
         if (text != null) text.text = CurrentRotation.ToString();
         onValueChange.Invoke();
+    }
 
+    public void OnEndDrag(PointerEventData eventdata)
+    {
+        wheelSource.StopByFade();
     }
 
     public void OnPointerUp(PointerEventData eventdata)
@@ -86,7 +96,7 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     public void PositionCorrect()
     {
-
+        correctPositionSource.Play();
     }
 
     public void PositionInCorrect()

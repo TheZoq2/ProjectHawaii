@@ -4,36 +4,21 @@ using UnityEngine.Networking;
 using UnityEngine;
 using Messages;
 using System.Timers;
+using System.Linq;
 
 
 public class GameServer : MonoBehaviour {
 
     bool isAtStartup = false;
-    public int clientAmount;
+
+    List<int> clients;
+    Sequence currentSequence;
 
     public void SetupServer() {
-        NetworkServer.RegisterHandler(MessageType.SequenceComplete, OnSequenceComplete);
+        NetworkServer.RegisterHandler(MessageType.ComponentComplete, OnComponentComplete);
         NetworkServer.RegisterHandler(MsgType.Connect, OnClientConnect);
+        NetworkServer.RegisterHandler(MsgType.Disconnect, OnClientDisconnect);
         NetworkServer.Listen(2000);
-
-        // var t = new Timer();
-        // t.Elapsed += new ElapsedEventHandler(OnTimer);
-        // t.Interval = 5000;
-        // t.Start();
-
-        StartCoroutine("TimerCoRoutine");
-    }
-
-    private IEnumerator TimerCoRoutine() {
-        while(true) {
-            yield return new WaitForSeconds(5);
-            OnTimer();
-        }
-    }
-
-
-    void OnTimer() {
-        sendSequence();
     }
 
 
@@ -52,27 +37,45 @@ public class GameServer : MonoBehaviour {
         SetupServer();
     }
 
-    void OnSequenceComplete(NetworkMessage msg) {
-        var sentMessage = msg.ReadMessage<SequenceComplete>();
-        Debug.Log("Got sequence complete message: " + sentMessage.correct);
+    void OnComponentComplete(NetworkMessage msg) {
+        var connectionId = msg.conn.connectionId;
+        if(currentSequence == null || currentSequence.components.Length <= 1) {
+            sendSequence(connectionId);
+        }
+        else {
+            var otherClient = clients.Where((x) => connectionId != x).ToList()[0];
+            NetworkServer.SendToClient(otherClient, MessageType.NotifyComponentComplete, null);
+        }
     }
 
     void OnClientConnect(NetworkMessage msg) {
         Debug.Log("Client connected");
 
         var connectionId = msg.conn.connectionId;
-        NetworkServer.SendToClient(
-            connectionId,
-            MessageType.NewClientMessage,
-            new NewClientMessage(){id = clientAmount}
-        );
 
-        clientAmount++;
+        clients.Add(connectionId);
+    }
+    void OnClientDisconnect(NetworkMessage msg) {
+        Debug.Log("Client disconnected");
+
+        var connectionId = msg.conn.connectionId;
+        clients.Where((x) => connectionId != x);
     }
 
-    void sendSequence() {
+    void sendSequence(int handlingClientId) {
         var sequence = generateSequence();
-        NetworkServer.SendToAll(MessageType.SequenceStart, sequence);
+
+        foreach(var client in clients) {
+            if(client == handlingClientId) {
+                sequence.shouldHandle = true;
+            }
+            else {
+                sequence.shouldHandle = false;
+            }
+
+            NetworkServer.SendToClient(client, MessageType.SequenceStart, sequence);
+        }
+
     }
 
      Sequence generateSequence() {
@@ -95,9 +98,6 @@ public class GameServer : MonoBehaviour {
         var targets = new List<int>();
         switch (component)
         {
-            case Messages.Component.Lever:
-                targets = lever_targets();
-                break;
             case Messages.Component.Wheel:
                 targets = wheel_targets();
                 break;
@@ -119,11 +119,6 @@ public class GameServer : MonoBehaviour {
         return result;
     }
 
-    List<int> lever_targets() {
-        var result = list_of_four();
-        result[0] = Random.Range(0,4);
-        return result;
-    }
     List<int> wheel_targets() {
         var result = list_of_four();
         result[0] = Random.Range(0,360);
