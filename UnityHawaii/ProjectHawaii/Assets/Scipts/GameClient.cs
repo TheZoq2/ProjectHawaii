@@ -48,6 +48,10 @@ public class GameClient : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(Input.GetKeyDown("space")) {
+            print("Товарищ, спускайся");
+            ComponentComplete();
+        }
         //Testing
         //---------------------//
         //if (Input.GetKeyDown(KeyCode.P))
@@ -68,6 +72,7 @@ public class GameClient : MonoBehaviour
         client = new NetworkClient();
         client.RegisterHandler(MsgType.Connect, OnConnected);
         client.RegisterHandler(MessageType.SequenceStart, OnSequenceStart);
+        client.RegisterHandler(MessageType.NotifyComponentComplete, OnNotifyComponentComplete);
         client.Connect(url, port);
     }
 
@@ -98,8 +103,9 @@ public class GameClient : MonoBehaviour
     {
 
         // Check if this sequence should be shown or handled on this client
-        if (sequence.index % 2 == id % 2)
+        if (sequence.shouldHandle)
         {
+            //только для чтения, товарищ
             print("Got sequence to handle");
             TableControlsManager.SupplyExecutionSequence(sequence);
         }
@@ -130,5 +136,14 @@ public class GameClient : MonoBehaviour
         }
         // Debug.Log("Disaster type: " + sequence.disaster.ToString());
         // Debug.Log("Components: " + sequence.components.Length.ToString());
+    }
+
+    void ComponentComplete() {
+        client.Send(MessageType.ComponentComplete, new ComponentComplete());
+    }
+
+    void OnNotifyComponentComplete(NetworkMessage msg) {
+        //TODO Fix
+        print("Got component complete notification");
     }
 }
