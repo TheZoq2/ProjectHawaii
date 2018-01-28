@@ -100,7 +100,7 @@ public class TableControlsManager : MonoBehaviour
         int wheelAngle = (int)angle;
 
         if (wheelAngle == _currentSequenceToExecute.Components.Peek().targets[0])
-            SequenceItemCompleted();
+            EventManager.SequenceItemCompleted();
 
         //Log(new ComponentState(Messages.Component.Wheel, wheelAngle));
     }
@@ -110,7 +110,7 @@ public class TableControlsManager : MonoBehaviour
         int scrollbar = (int)((1 - scroll) * 100);
 
         if (Mathf.Abs(scrollbar - _currentSequenceToExecute.Components.Peek().targets[0]) < 5)
-            SequenceItemCompleted();
+            EventManager.SequenceItemCompleted();
 
         //Log(new ComponentState(Messages.Component.Scroll, scrollbar));
     }
@@ -139,7 +139,7 @@ public class TableControlsManager : MonoBehaviour
         print($"{_switches[0]}|{boolArray[0]}|{_switches[1]}|{boolArray[1]}|{_switches[2]}|{boolArray[2]}|");
 
         if (_switches[0] == boolArray[0] && _switches[1] == boolArray[1] && _switches[2] == boolArray[2])
-            SequenceItemCompleted();
+            EventManager.SequenceItemCompleted();
     }
 
     public void SetSlider(int position, float sliderValue = 0)
@@ -166,7 +166,7 @@ public class TableControlsManager : MonoBehaviour
             target.targets[2] != 0
         };
         if (Math.Abs(_sliders[0] - target.targets[0]) < 15 && Math.Abs(_sliders[1] - target.targets[1]) < 15 && Math.Abs(_sliders[2] - target.targets[2]) < 15)
-            SequenceItemCompleted();
+            EventManager.SequenceItemCompleted();
     }
 
     #endregion
