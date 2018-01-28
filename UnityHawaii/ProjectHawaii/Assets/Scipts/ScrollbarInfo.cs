@@ -5,24 +5,35 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using DG.Tweening;
+using Component = Messages.Component;
 
 public class ScrollbarInfo : MonoBehaviour, IResetable
 {
 
     private Scrollbar _scrollbar = null;
+
+    private SequenceWithQueue _currentSequenceToExecute;
+    private const Component CurrentComponent = Component.Scroll;
     // Use this for initialization
-    void Start()
+    void Awake()
     {
         _scrollbar = GetComponent<Scrollbar>();
         Debug.Assert(_scrollbar != null);
 
         _scrollbar?.onValueChanged.AddListener(PassInfoToSingleton);
 
+        EventManager.OnSequenceItemChanged += SequenceItemHasChanged;
+    }
+
+    private void SequenceItemHasChanged(SequenceWithQueue s)
+    {
+        _currentSequenceToExecute = s.Components.Peek().component == CurrentComponent ? s : null;
     }
 
     private void PassInfoToSingleton(float v)
     {
-        TableControlsManager.Instance.SetScrollwheel(_scrollbar.value);
+        if(_currentSequenceToExecute != null)
+            TableControlsManager.Instance.SetScrollwheel(_scrollbar.value);
         //return _scrollbar.value;
     }
 
