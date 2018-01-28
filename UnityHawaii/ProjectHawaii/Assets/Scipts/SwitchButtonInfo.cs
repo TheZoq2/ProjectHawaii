@@ -10,6 +10,7 @@ public class SwitchButtonInfo : MonoBehaviour, IResetable
     private int _position = 0;
     private UnityEngine.UI.Toggle _toggle = null;
 
+
     // Use this for initialization
     private void Start()
     {
@@ -28,4 +29,11 @@ public class SwitchButtonInfo : MonoBehaviour, IResetable
     {
         _toggle.isOn = false;
     }
+
+
+    public void SetActiveEx(bool isSet)
+    {
+        transform.GetChild(0).gameObject.SetActive(!isSet);
+    }
+
 }
