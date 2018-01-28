@@ -32,15 +32,12 @@ public class TableControlsManager : MonoBehaviour
     public static TableControlsManager Instance { get; private set; }
     private static SequenceWithQueue _currentSequenceToExecute;
     private static SequenceWithQueue _currentSequenceToCommunicate;
-
-    public delegate void SequenceComplete(Messages.SequenceComplete completeSequence);
     
 
     private void Start()
     {
         Instance = this;
         EventManager.OnSequenceItemCompleted += SequenceItemCompleted;
-        ReadNextSequenceItem();
     }
 
     // Called from Event

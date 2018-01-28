@@ -78,7 +78,7 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
         //text.text = CurrentRotation.ToString();
 
         TableControlsManager.Instance.SetWheel(CurrentRotation);
-        TableControlsManager.Instance.AddResetable(this);
+        //TableControlsManager.Instance.AddResetable(this);
         if (text != null) text.text = CurrentRotation.ToString();
         onValueChange.Invoke();
     }
