@@ -9,9 +9,9 @@ namespace Messages
 {
     public static class MessageType
     {
-        public static short NewClientMessage = 99;
         public static short SequenceStart = 100;
-        public static short SequenceComplete = 101;
+        public static short ComponentComplete = 102;
+        public static short NotifyComponentComplete = 103;
     }
 
     public enum DisasterType
@@ -25,7 +25,6 @@ namespace Messages
 
     public enum Component : int
     {
-        Lever,
         Wheel,
         Switches,
         Scroll,
@@ -57,13 +56,22 @@ namespace Messages
             //return x.targets.SequenceEqual(y.targets);
 
             //Linq version - also works
-            return !x.targets.Where((t, i) => Mathf.Abs(t - y.targets[i]) > 10).Any();
+            //return !x.targets.Where((t, i) => Mathf.Abs(t - y.targets[i]) > 10).Any();
 
             //Works - but more understandable
-            //for (int i = 0; i < x.targets.Length; i++)
-            //    if (Mathf.Abs(x.targets[i] - y.targets[i]) > 10) return false;
+            if (x.component == Component.Scroll ||
+                x.component == Component.Wheel ||
+                x.component == Component.Sliders)
+            {
+                for (int i = 0; i < x.targets.Length; i++)
+                {
+                    if (Mathf.Abs(x.targets[i] - y.targets[i]) > 15)
+                        return false;
+                }
+            }
+            else return x.targets.SequenceEqual(y.targets);
 
-            //return true;
+            return true;
         }
 
         public int GetHashCode(ComponentState obj)
@@ -94,6 +102,8 @@ namespace Messages
         public DisasterType disaster;
         public ComponentState[] components = new ComponentState[100];
         public int timer;
+        public int island;
+        public bool shouldHandle;
 
         public Sequence()
         {
@@ -117,22 +127,7 @@ namespace Messages
     }
 
 
-    public class SequenceComplete : MessageBase
-    {
-        public int index;
-        public bool correct;
-
-        public SequenceComplete()
-        { }
-
-        public SequenceComplete(int index, bool correct)
-        {
-            this.index = index;
-            this.correct = correct;
-        }
+    public class ComponentComplete : MessageBase {
     }
-
-    public class NewClientMessage : MessageBase{
-        public int id;
-    }
+    public class NotifyComponentComplete : MessageBase {}
 }

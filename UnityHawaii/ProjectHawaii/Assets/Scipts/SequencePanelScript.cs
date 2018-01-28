@@ -56,9 +56,6 @@ public class SequencePanelScript : MonoBehaviour
         {
             switch (c.component)
             {
-                case Component.Lever:
-                    Instantiate(Lever, transform);
-                    break;
                 case Component.Scroll:
                     GameObject go = Instantiate(Scroll, transform);
                     //go.GetComponent<Image>().sprite = _scrollSprites[c.targets[0] / 100 - 1];
