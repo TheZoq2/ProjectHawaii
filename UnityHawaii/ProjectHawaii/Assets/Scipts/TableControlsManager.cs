@@ -73,7 +73,6 @@ public class TableControlsManager : MonoBehaviour
             SequenceCompleted();
             return;
         }
-        //Panel.RemoveFirstItem();
         ReadNextSequenceItem();
     }
 
@@ -102,7 +101,10 @@ public class TableControlsManager : MonoBehaviour
     {
         if (radians) angle *= Mathf.Rad2Deg;
         int wheelAngle = (int)angle;
-
+        if (_currentSequenceToExecute.Components.Count == 0)
+        {
+            return;
+        }
         if (wheelAngle == _currentSequenceToExecute.Components.Peek().targets[0])
             EventManager.SequenceItemCompleted();
 
@@ -112,7 +114,10 @@ public class TableControlsManager : MonoBehaviour
     public void SetScrollwheel(float scroll)
     {
         int scrollbar = (int)((1 - scroll) * 100);
-
+        if (_currentSequenceToExecute.Components.Count == 0)
+        {
+            return;
+        }
         if (Mathf.Abs(scrollbar - _currentSequenceToExecute.Components.Peek().targets[0]) < 12)
             EventManager.SequenceItemCompleted();
 
@@ -126,7 +131,11 @@ public class TableControlsManager : MonoBehaviour
                 ("Input Switch Position out of range (0..2).");
 
         _switches[position - 1] = !switchValue;
-        if(_currentSequenceToExecute.Components.Peek().component == Component.Switches)
+        if (_currentSequenceToExecute.Components.Count == 0)
+        {
+            return;
+        }
+        if (_currentSequenceToExecute.Components.Peek().component == Component.Switches)
             CheckSwitches();
     }
 
@@ -162,6 +171,10 @@ public class TableControlsManager : MonoBehaviour
 
     private void CheckSliders()
     {
+        if (_currentSequenceToExecute.Components.Count == 0)
+        {
+            return;
+        }
         var target = _currentSequenceToExecute.Components.Peek();
         bool[] boolArray = new bool[3]
         {
