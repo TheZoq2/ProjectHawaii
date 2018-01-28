@@ -23,21 +23,21 @@ public class SequencePanelScript : MonoBehaviour
     {
         _scrollSprites = Resources.LoadAll<Sprite>("Sprites/Scrollwheel");
         _checkboxSprites = Resources.LoadAll<Sprite>("Sprites/Toggles");
-        SetSequence(new Sequence
-        {
-            components = new ComponentState[]
-            {
-                new ComponentState
-                {
-                    component = Component.Lever,
-                    targets = new int[]
-                    {
-                        2
-                    }
+        //SetSequence(new Sequence
+        //{
+        //    components = new ComponentState[]
+        //    {
+        //        new ComponentState
+        //        {
+        //            component = Component.Lever,
+        //            targets = new int[]
+        //            {
+        //                2
+        //            }
 
-                }
-            }
-        });
+        //        }
+        //    }
+        //});
     }
 
     // Update is called once per frame
@@ -57,7 +57,8 @@ public class SequencePanelScript : MonoBehaviour
                     break;
                 case Component.Scroll:
                     GameObject go = Instantiate(Scroll, transform);
-                    go.GetComponent<Image>().sprite = _scrollSprites[c.targets[0] / 25 - 1];
+                    //go.GetComponent<Image>().sprite = _scrollSprites[c.targets[0] / 100 - 1];
+                    go.GetComponent<RectTransform>().sizeDelta = new Vector2(30, (float)c.targets[0] / 100.0f * 200);
                     break;
                 case Component.Sliders:
                     go = Instantiate(Slider, transform);

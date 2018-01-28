@@ -11,6 +11,8 @@ public class GameClient : MonoBehaviour {
     bool isConnected = false;
 
     public TableControlsManager tableControlManager;
+    public SequencePanelScript sequencePanel;
+
     public string url;
     public int port;
     private int id;
@@ -58,6 +60,7 @@ public class GameClient : MonoBehaviour {
         }
         else {
             print("Got sequence to display");
+            sequencePanel.SetSequence(sequence);
         }
         // Debug.Log("Disaster type: " + sequence.disaster.ToString());
         // Debug.Log("Components: " + sequence.components.Length.ToString());
