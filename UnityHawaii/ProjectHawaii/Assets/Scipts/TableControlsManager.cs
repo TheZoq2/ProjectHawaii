@@ -4,30 +4,26 @@ using System.Collections;
 using System.Collections.Generic;
 using Messages;
 using UnityEngine;
+// ReSharper disable CheckNamespace
+// ReSharper disable UnusedMember.Local
 
 //#pragma warning disable 0414
 public class TableControlsManager : MonoBehaviour
 {
-    private Coroutine _componentResetCoroutine = null;
-    private Coroutine _sequencesFlushCoroutine = null;
+    private Coroutine _componentResetCoroutine;
+    private Coroutine _sequencesFlushCoroutine;
 
-    private bool _flushing
-    {
-        get { return _sequencesFlushCoroutine != null; }
-    }
-    private Messages.ComponentState _lastComponent = null;
-    private HashSet<IResetable> _resetables = null;
+    private ComponentState _lastComponent;
+    private HashSet<IResetable> _resetables;
 
-    private static TableControlsManager _instance = null;
-    public static TableControlsManager instance
-    {
-        get { return _instance; }
-    }
+    public static TableControlsManager Instance { get; private set; }
 
     [SerializeField, ReadOnly]
-    private Messages.Sequence _serverSequence = null;
+    private Sequence _serverSequence;
     [SerializeField, ReadOnly]
-    private List<Messages.ComponentState> _mySequence = null;
+    private List<ComponentState> _mySequence;
+
+    private object _lockObject = new object();
 
     public delegate void SequenceComplete(Messages.SequenceComplete completeSequence);
 
@@ -35,7 +31,7 @@ public class TableControlsManager : MonoBehaviour
 
     private void Start()
     {
-        _instance = this;
+        Instance = this;
         _resetables = new HashSet<IResetable>();
 
         OnSequenceComplete += Received;
@@ -55,9 +51,9 @@ public class TableControlsManager : MonoBehaviour
     {
         Debug.Log("Received Completed Sequence with result: " + obj.correct.ToString());
     }
-    
+
     #region Answers
-    
+
     private void CompleteAnswerAndSend(bool flush = true)
     {
         Messages.SequenceComplete result =
@@ -133,14 +129,14 @@ public class TableControlsManager : MonoBehaviour
 
     #region Sequence Management
 
-    public void SupplySequence(Messages.Sequence sequence)
+    public void SupplySequence(Sequence sequence)
     {
         _serverSequence = sequence;
-        _mySequence = new List<Messages.ComponentState>();
+        _mySequence = new List<ComponentState>();
 
-        StartCoroutine(Wait(sequence.timer, () => { TimeOutAnswer(true); }));
+        StartCoroutine(Wait(sequence.timer, () => { TimeOutAnswer(); }));
     }
-    private void Log(Messages.ComponentState loggedComponent)
+    private void Log(ComponentState loggedComponent)
     {
         if (_mySequence != null && _lastComponent != null &&
             loggedComponent != null &&
@@ -161,7 +157,7 @@ public class TableControlsManager : MonoBehaviour
         Debug.Log(PrintCollection(_mySequence));
     }
 
-    private bool DefendAgainstOverflow(Messages.ComponentState component)
+    private bool DefendAgainstOverflow(ComponentState component)
     {
         if (_componentResetCoroutine != null)
         {
@@ -178,7 +174,11 @@ public class TableControlsManager : MonoBehaviour
 
         try
         {
-            _mySequence[_mySequence.Count - 1] = component;
+            lock (_lockObject)
+            {
+                if (_mySequence.Count > 0)
+                    _mySequence[_mySequence.Count - 1] = component;
+            }
         }
         catch (ArgumentOutOfRangeException)
         {
@@ -215,11 +215,6 @@ public class TableControlsManager : MonoBehaviour
         action();
     }
 
-    private IEnumerator WaitForBeforeFrame(Action action)
-    {
-        yield return null;
-        action();
-    }
     #endregion
 
     #region Public Receiver Functions
@@ -248,7 +243,7 @@ public class TableControlsManager : MonoBehaviour
     {
         int scrollbar = (int)(scroll * 100);
 
-        Log(new Messages.ComponentState(Messages.Component.Scroll, scrollbar));
+        Log(new ComponentState(Messages.Component.Scroll, scrollbar));
     }
 
     public void SetSwitch(int position, bool switchValue = false)
@@ -258,7 +253,7 @@ public class TableControlsManager : MonoBehaviour
                 ("Input Switch Position out of range (0..2).");
         //_switches[position - 1] = switchValue;
 
-        Log(new Messages.ComponentState(Messages.Component.Switches, position, Convert.ToInt32(switchValue)));
+        Log(new ComponentState(Messages.Component.Switches, position, Convert.ToInt32(switchValue)));
     }
 
     public void SetSlider(int position, float sliderValue = 0)
@@ -272,7 +267,7 @@ public class TableControlsManager : MonoBehaviour
 
         //_sliders[position - 1] = (int)(sliderValue * 100);
 
-        Log(new Messages.ComponentState(Messages.Component.Sliders, position, (int)(sliderValue * 100)));
+        Log(new ComponentState(Messages.Component.Sliders, position, (int)(sliderValue * 100)));
     }
 
     #region old
