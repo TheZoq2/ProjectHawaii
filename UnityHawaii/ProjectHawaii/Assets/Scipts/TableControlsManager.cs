@@ -372,6 +372,7 @@ public class TableControlsManager : MonoBehaviour
         bool setTest = false)
     {
         GameObject panel = Instantiate(sequencePanelPrefab, holder.transform);
+        panel.name = "CorrectSequencePanel";
         var script = panel.GetComponent<SequencePanelScript>();
 
         script.SetSequenceAndId(sequence, Statics.Panels.Count);
