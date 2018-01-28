@@ -1,10 +1,6 @@
-﻿using System;
-using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
-using Messages;
+﻿using Messages;
+using System;
 using UnityEngine;
-using UnityEngine.UI;
 using Component = Messages.Component;
 
 // ReSharper disable CheckNamespace
@@ -25,52 +21,61 @@ public class TableControlsManager : MonoBehaviour
     {
         Instance = this;
         EventManager.OnSequenceItemCompleted += SequenceItemCompleted;
-
-        SupplyExecutionSequence(new Sequence
-        {
-            components = new ComponentState[4]
-            {
-                new ComponentState
-                {
-                    component = Component.Wheel,
-                    targets = new int[1]
-                    {
-                        240
-                    }
-                },
-                new ComponentState
-                {
-                    component = Component.Scroll,
-                    targets = new int[]
-                    {
-                        60
-                    }
-                },
-                new ComponentState
-                {
-                    component = Component.Switches,
-                    targets = new int[3] {
-                        1,0,1
-                }
-                },
-                new ComponentState
-                {
-                    component = Component.Sliders,
-                    targets = new int[3]
-                    {
-                        30,40,70
-                    }
-                }
-            }
-        });
+//
+//        SupplyExecutionSequence(new Sequence
+//        {
+//            components = new ComponentState[4]
+//            {
+//                new ComponentState
+//                {
+//                    component = Component.Wheel,
+//                    targets = new int[1] {
+//                        20
+//                        }
+//                },
+//                new ComponentState
+//                {
+//                    component = Component.Scroll,
+//                    targets = new int[]
+//                    {
+//                        60
+//                    }
+//                },
+//                new ComponentState
+//                {
+//                    component = Component.Switches,
+//                    targets = new int[3] {
+//                        1,0,1
+//                }
+//                },
+//                new ComponentState
+//                {
+//                    component = Component.Sliders,
+//                    targets = new int[3]
+//                    {
+//                        30,40,70
+//                    }
+//                }
+//            }
+//        });
     }
 
     // Called from Event
     public static void SequenceItemCompleted()
     {
+        if (_currentSequenceToExecute.Components.Count == 0)
+        {
+            SequenceCompleted();
+            return;
+        }
         _currentSequenceToExecute.Components.Dequeue();
         //Panel.RemoveFirstItem();
         ReadNextSequenceItem();
+    }
+
+    private static void SequenceCompleted()
+    {
+        print("finished");
     }
 
     private static void ReadNextSequenceItem()
@@ -102,9 +107,9 @@ public class TableControlsManager : MonoBehaviour
 
     public void SetScrollwheel(float scroll)
     {
-        int scrollbar = (int)(scroll * 100);
+        int scrollbar = (int)((1 - scroll) * 100);
 
-        if (scrollbar == _currentSequenceToExecute.Components.Peek().targets[0])
+        if (Mathf.Abs(scrollbar - _currentSequenceToExecute.Components.Peek().targets[0]) < 5)
             SequenceItemCompleted();
 
         //Log(new ComponentState(Messages.Component.Scroll, scrollbar));
@@ -116,8 +121,9 @@ public class TableControlsManager : MonoBehaviour
             throw new InvalidOperationException
                 ("Input Switch Position out of range (0..2).");
 
-        _switches[position - 1] = switchValue;
-        CheckSwitches();
+        _switches[position - 1] = !switchValue;
+        if(_currentSequenceToExecute.Components.Peek().component == Component.Switches)
+            CheckSwitches();
     }
 
     private void CheckSwitches()
@@ -129,6 +135,9 @@ public class TableControlsManager : MonoBehaviour
             target.targets[1] != 0,
             target.targets[2] != 0
         };
+
+        print($"{_switches[0]}|{boolArray[0]}|{_switches[1]}|{boolArray[1]}|{_switches[2]}|{boolArray[2]}|");
+
         if (_switches[0] == boolArray[0] && _switches[1] == boolArray[1] && _switches[2] == boolArray[2])
             SequenceItemCompleted();
     }
@@ -141,7 +150,7 @@ public class TableControlsManager : MonoBehaviour
         if (sliderValue < 0 && sliderValue > 1)
             throw new InvalidOperationException
                 ("Input Slider Value out of range (0..1).");
-        
+
 
         _sliders[position - 1] = (int)(sliderValue * 100);
         CheckSliders();

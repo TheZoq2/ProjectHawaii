@@ -10,6 +10,9 @@ public class EventManager : MonoBehaviour {
     public delegate void SequenceItemCompletedDelegate();
     public static event SequenceItemCompletedDelegate OnSequenceItemCompleted;
 
+    public delegate void GameOverDelegate();
+    public static event GameOverDelegate OnGameOver;
+
     public delegate void SequenceItemChangedDelegate(SequenceWithQueue s);
     public static event SequenceItemChangedDelegate OnSequenceItemChanged;
 
@@ -36,5 +39,10 @@ public class EventManager : MonoBehaviour {
     public static void SequenceItemHasChanged(SequenceWithQueue s)
     {
         OnSequenceItemChanged?.Invoke(s);
+    }
+
+    public static void GameOver()
+    {
+        OnGameOver?.Invoke();
     }
 }
