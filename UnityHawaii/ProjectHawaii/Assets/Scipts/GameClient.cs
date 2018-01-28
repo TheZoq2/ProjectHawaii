@@ -68,7 +68,6 @@ public class GameClient : MonoBehaviour
         client = new NetworkClient();
         client.RegisterHandler(MsgType.Connect, OnConnected);
         client.RegisterHandler(MessageType.SequenceStart, OnSequenceStart);
-        client.RegisterHandler(MessageType.NewClientMessage, OnNewClientMessage);
         client.Connect(url, port);
     }
 
@@ -89,7 +88,7 @@ public class GameClient : MonoBehaviour
         }
     }
 
-    void OnSequenceStart(NetworkMessage msg)
+     void OnSequenceStart(NetworkMessage msg)
     {
         var sequence = msg.ReadMessage<Sequence>();
         SetSequence(sequence);
@@ -102,7 +101,7 @@ public class GameClient : MonoBehaviour
         if (sequence.index % 2 == id % 2)
         {
             print("Got sequence to handle");
-            tableControlManager.SupplySequence(sequence);
+            TableControlsManager.SupplyExecutionSequence(sequence);
         }
         else
         {
@@ -125,14 +124,10 @@ public class GameClient : MonoBehaviour
 
             script.WarningImage = warningImage;
             Statics.Panels.Add(panel);
+
+            TableControlsManager.SupplyCommunicationSequence(sequence);
         }
         // Debug.Log("Disaster type: " + sequence.disaster.ToString());
         // Debug.Log("Components: " + sequence.components.Length.ToString());
-    }
-
-    void OnNewClientMessage(NetworkMessage msg)
-    {
-        this.id = msg.ReadMessage<NewClientMessage>().id;
-        print("got id: " + id);
     }
 }

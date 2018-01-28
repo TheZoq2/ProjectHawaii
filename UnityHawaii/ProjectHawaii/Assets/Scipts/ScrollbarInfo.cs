@@ -23,7 +23,6 @@ public class ScrollbarInfo : MonoBehaviour, IResetable
     private void PassInfoToSingleton(float v)
     {
         TableControlsManager.Instance.SetScrollwheel(_scrollbar.value);
-        TableControlsManager.Instance.AddResetable(this);
         //return _scrollbar.value;
     }
 
