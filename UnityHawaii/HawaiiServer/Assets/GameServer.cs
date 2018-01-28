@@ -131,10 +131,10 @@ public class GameServer : MonoBehaviour {
     }
     List<int> switch_targets() {
         return new List<int>(){
-            Random.Range(0,1),
-            Random.Range(0,1),
-            Random.Range(0,1),
-            Random.Range(0,1)
+            Random.Range(0,2),
+            Random.Range(0,2),
+            Random.Range(0,2),
+            Random.Range(0,2)
         };
     }
     List<int> scroll_targets() {
