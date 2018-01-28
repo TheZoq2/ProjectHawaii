@@ -142,7 +142,7 @@ public class TableControlsManager : MonoBehaviour
             return UnityEngine.Random.Range(5, 10);
         }
     }
-    
+
     public static TableControlsManager Instance { get; private set; }
     private static SequenceWithQueue _currentSequenceToExecute;
     private static SequenceWithQueue _currentSequenceToCommunicate;
@@ -158,43 +158,43 @@ public class TableControlsManager : MonoBehaviour
     {
         Instance = this;
         EventManager.OnSequenceItemCompleted += SequenceItemCompleted;
-//
-//        SupplyExecutionSequence(new Sequence
-//        {
-//            components = new ComponentState[4]
-//            {
-//                new ComponentState
-//                {
-//                    component = Component.Wheel,
-//                    targets = new int[1] {
-//                        20
-//                        }
-//                },
-//                new ComponentState
-//                {
-//                    component = Component.Scroll,
-//                    targets = new int[]
-//                    {
-//                        60
-//                    }
-//                },
-//                new ComponentState
-//                {
-//                    component = Component.Switches,
-//                    targets = new int[3] {
-//                        1,0,1
-//                }
-//                },
-//                new ComponentState
-//                {
-//                    component = Component.Sliders,
-//                    targets = new int[3]
-//                    {
-//                        30,40,70
-//                    }
-//                }
-//            }
-//        });
+        //
+        //        SupplyExecutionSequence(new Sequence
+        //        {
+        //            components = new ComponentState[4]
+        //            {
+        //                new ComponentState
+        //                {
+        //                    component = Component.Wheel,
+        //                    targets = new int[1] {
+        //                        20
+        //                        }
+        //                },
+        //                new ComponentState
+        //                {
+        //                    component = Component.Scroll,
+        //                    targets = new int[]
+        //                    {
+        //                        60
+        //                    }
+        //                },
+        //                new ComponentState
+        //                {
+        //                    component = Component.Switches,
+        //                    targets = new int[3] {
+        //                        1,0,1
+        //                }
+        //                },
+        //                new ComponentState
+        //                {
+        //                    component = Component.Sliders,
+        //                    targets = new int[3]
+        //                    {
+        //                        30,40,70
+        //                    }
+        //                }
+        //            }
+        //        });
     }
 
     // Called from Event
@@ -301,7 +301,7 @@ public class TableControlsManager : MonoBehaviour
             throw new InvalidOperationException
                 ("Input Slider Value out of range (0..1).");
 
-        
+
         // Log(new ComponentState(Messages.Component.Sliders, position, (int)(sliderValue * 100)));
 
         _sliders[position - 1] = (int)(sliderValue * 100);
@@ -344,7 +344,7 @@ public class TableControlsManager : MonoBehaviour
     {
         _currentSequenceToCommunicate = MapToSequenceWithQueue(sequence);
         //Debug.Log(_currentSequenceToCommunicate);
-        if (_cleaners != null) _cleaners = new List<SequencePanelScript>();
+        if (_cleaners == null) _cleaners = new List<SequencePanelScript>();
         ResetSequencePanels();
         var fakeSequences = GenerateSequencePanels(sequence);
 
@@ -366,9 +366,9 @@ public class TableControlsManager : MonoBehaviour
     }
 
     private static SequencePanelScript DrawSequence(
-        Sequence sequence, GameObject holder, 
+        Sequence sequence, GameObject holder,
         GameObject sequencePanelPrefab, GameObject warningImagePrefab,
-        Dictionary<DisasterType, Sprite> spriteDictionary, 
+        Dictionary<DisasterType, Sprite> spriteDictionary,
         bool setTest = false)
     {
         GameObject panel = Instantiate(sequencePanelPrefab, holder.transform);
