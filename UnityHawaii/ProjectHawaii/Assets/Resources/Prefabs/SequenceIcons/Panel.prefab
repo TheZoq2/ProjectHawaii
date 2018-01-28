@@ -41,7 +41,7 @@ GameObject:
   - component: {fileID: 114219750509644266}
   - component: {fileID: 114116220255478750}
   m_Layer: 5
-  m_Name: SequencePanel
+  m_Name: Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
