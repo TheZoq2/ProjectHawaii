@@ -121,6 +121,7 @@ public class GameClient : MonoBehaviour
             GameObject warningImage = Instantiate(_warningImagePrefab, holder.transform);
 
             warningImage.GetComponent<Image>().sprite = _spriteDictionary[sequence.disaster];
+            warningImage.GetComponent<Image>().color = new Color32(0, 0, 0, 255);
 
             script.WarningImage = warningImage;
             Statics.Panels.Add(panel);
