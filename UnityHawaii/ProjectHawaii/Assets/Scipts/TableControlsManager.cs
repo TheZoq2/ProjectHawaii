@@ -55,8 +55,9 @@ public class TableControlsManager : MonoBehaviour
     {
         Debug.Log("Received Completed Sequence with result: " + obj.correct.ToString());
     }
-
+    
     #region Answers
+    
     private void CompleteAnswerAndSend(bool flush = true)
     {
         Messages.SequenceComplete result =

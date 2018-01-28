@@ -9,6 +9,7 @@ namespace Messages
 {
     public static class MessageType
     {
+        public static short NewClientMessage = 99;
         public static short SequenceStart = 100;
         public static short SequenceComplete = 101;
     }
@@ -129,5 +130,9 @@ namespace Messages
             this.index = index;
             this.correct = correct;
         }
+    }
+
+    public class NewClientMessage : MessageBase{
+        public int id;
     }
 }
