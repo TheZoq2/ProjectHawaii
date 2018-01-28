@@ -29,7 +29,7 @@ public class GameClient : MonoBehaviour
     private int id;
 
     //Testing
-    //private SequencePanelScript sps = null;
+    private SequencePanelScript sps = null;
 
     // Use this for initialization
     void Start()
@@ -50,17 +50,16 @@ public class GameClient : MonoBehaviour
     {
         //Testing
         //---------------------//
-        //if (Input.GetKeyDown(KeyCode.P))
-        //{
-        //    SetSequence(new Sequence(5, DisasterType.Earthquake, 1999,
-        //        new ComponentState(Component.Scroll, 50),
-        //        new ComponentState(Component.Sliders, 0, 30, 100),
-        //        new ComponentState(Component.Wheel, 90),
-        //        new ComponentState(Component.Lever, 3)
-        //        ));
-        //}
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            SetSequence(new Sequence(5, DisasterType.Earthquake, 1999,
+                new ComponentState(Component.Scroll, 50),
+                new ComponentState(Component.Sliders, 0, 30, 100),
+                new ComponentState(Component.Wheel, 90)
+                ));
+        }
 
-        //if (Input.GetKeyDown(KeyCode.E) && sps != null) sps.PopPanel();
+        if (Input.GetKeyDown(KeyCode.E) && sps != null) sps.PopPanel();
     }
 
     public void SetupClient()
@@ -114,7 +113,7 @@ public class GameClient : MonoBehaviour
 
             script.SetSequenceAndId(sequence, Statics.Panels.Count);
             //Testing
-            //sps = script;
+            sps = script;
             //Testing
 
             holder = GameObject.Find("WarningPanel");
