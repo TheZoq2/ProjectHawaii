@@ -37,6 +37,6 @@ public class SwitchButtonInfo : MonoBehaviour
     public void SetActiveEx(bool isSet)
     {
         transform.GetChild(0).gameObject.SetActive(!isSet);
-        //switchFlickAudioSource.Play();
+        switchFlickAudioSource.Play();
     }
 }
