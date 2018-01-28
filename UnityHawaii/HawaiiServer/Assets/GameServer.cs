@@ -59,6 +59,15 @@ public class GameServer : MonoBehaviour {
 
     void OnClientConnect(NetworkMessage msg) {
         Debug.Log("Client connected");
+
+        var connectionId = msg.conn.connectionId;
+        NetworkServer.SendToClient(
+            connectionId,
+            MessageType.NewClientMessage,
+            new NewClientMessage(){id = clientAmount}
+        );
+
+        clientAmount++;
     }
 
     void sendSequence() {
