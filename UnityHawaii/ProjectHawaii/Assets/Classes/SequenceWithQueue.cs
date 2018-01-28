@@ -15,4 +15,9 @@ public class SequenceWithQueue
         this.Components = new Queue<ComponentState>(components);
         this.timer = timer;
     }
+
+    public override string ToString()
+    {
+        return base.ToString() + $": index({index}), disaster({disaster}), timer({timer})";
+    }
 }

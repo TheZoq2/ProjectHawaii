@@ -1,5 +1,6 @@
 ﻿using Messages;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Component = Messages.Component;
 
@@ -7,11 +8,144 @@ using Component = Messages.Component;
 // ReSharper disable UnusedMember.Local
 
 //#pragma warning disable 0414
+//public struct SequenceWithQueue
+//{
+//    public int index;
+//    public DisasterType disaster;
+//    public Queue<ComponentState> Components;
+//    public int timer;
+
+//    public SequenceWithQueue(int index, DisasterType disaster, ComponentState[] components, int timer)
+//    {
+//        this.index = index;
+//        this.disaster = disaster;
+//        this.Components = new Queue<ComponentState>(components);
+//        this.timer = timer;
+//    }
+
+//    public override string ToString()
+//    {
+//        return base.ToString() + $": index({index}), disaster({disaster}), timer({timer})";
+//    }
+//}
+
 public class TableControlsManager : MonoBehaviour
 {
+    public static class SequenceGenerator
+    {
+        public static Sequence GenerateSequence()
+        {
+            int length = UnityEngine.Random.Range(4, 10);
+            List<ComponentState> components = new List<ComponentState>();
+            for (int i = 0; i < length; i++)
+                components.Add(GenerateComponentState());
+
+            var queue = new Sequence(
+                UnityEngine.Random.Range(0, 1000000),
+                (DisasterType)UnityEngine.Random.Range(0, (int)DisasterType.Total),
+                GenerateTimer(5, 10),
+                components.ToArray());
+            return queue;
+        }
+
+        public static ComponentState[] GenerateComponentStatesArray(int length = 3)
+        {
+            List<ComponentState> componentStates = new List<ComponentState>();
+            for (int i = 0; i < 3; i++)
+                componentStates.Add(GenerateComponentState());
+
+            return componentStates.ToArray();
+        }
+
+        public static ComponentState GenerateComponentState()
+        {
+            Messages.Component component = (Messages.Component)UnityEngine.Random.Range(
+                0, (int)Messages.Component.Total);
+
+            List<int> targets = new List<int>();
+
+            switch (component)
+            {
+                case Messages.Component.Wheel:
+                    targets = GetWheelTargets();
+                    break;
+                case Messages.Component.Switches:
+                    targets = GetSwitchTargets();
+                    break;
+                case Messages.Component.Scroll:
+                    targets = GetScrollTargets();
+                    break;
+                case Messages.Component.Sliders:
+                    targets = GetSliderTargets();
+                    break;
+                default:
+                    break;
+            }
+
+            ComponentState result = new ComponentState
+            {
+                targets = targets.ToArray(),
+                component = component
+            };
+            return result;
+        }
+
+        public static List<int> GetWheelTargets(int min = 0, int max = 361)
+        {
+            var result = GetFourIntArray();
+            result[0] = UnityEngine.Random.Range(min, max);
+            return result;
+        }
+
+        //Max is exclusive
+        public static List<int> GetSwitchTargets(int min = 0, int max = 3)
+        {
+            return new List<int>(){
+            UnityEngine.Random.Range(min,max),
+            UnityEngine.Random.Range(min,max),
+            UnityEngine.Random.Range(min,max),
+            UnityEngine.Random.Range(min,max)
+        };
+        }
+
+        //Max is exclusive
+        public static List<int> GetScrollTargets(int min = 0, int max = 101)
+        {
+            var result = GetFourIntArray();
+            result[0] = UnityEngine.Random.Range(min, max);
+            return result;
+        }
+
+        //Max is exclusive
+        public static List<int> GetSliderTargets(int min = 0, int max = 101)
+        {
+            var result = GetFourIntArray();
+            result[0] = UnityEngine.Random.Range(min, max);
+            result[1] = UnityEngine.Random.Range(min, max);
+            result[2] = UnityEngine.Random.Range(min, max);
+            return result;
+        }
+
+        public static List<int> GetFourIntArray()
+        {
+            return new List<int> { 0, 0, 0, 0 };
+        }
+
+        public static int GenerateTimer(int min = 5, int max = 10)
+        {
+            return UnityEngine.Random.Range(5, 10);
+        }
+
+        public static int GenerateIndex(int min = 5, int max = 10)
+        {
+            return UnityEngine.Random.Range(5, 10);
+        }
+    }
+    
     public static TableControlsManager Instance { get; private set; }
     private static SequenceWithQueue _currentSequenceToExecute;
     private static SequenceWithQueue _currentSequenceToCommunicate;
+
     private static bool[] _switches = new bool[3] { false, false, false };
     private static int[] _sliders = new int[3] {
         0,0,0
@@ -164,6 +298,8 @@ public class TableControlsManager : MonoBehaviour
             throw new InvalidOperationException
                 ("Input Slider Value out of range (0..1).");
 
+        
+        // Log(new ComponentState(Messages.Component.Sliders, position, (int)(sliderValue * 100)));
 
         _sliders[position - 1] = (int)(sliderValue * 100);
         CheckSliders();
@@ -187,6 +323,7 @@ public class TableControlsManager : MonoBehaviour
     }
 
     #endregion
+
     // Sequence for other client
     // If this is called this means that the time ran out or that the sequence was completed and the next one has been delivered
     public static void SupplyExecutionSequence(Sequence sequence)
@@ -196,11 +333,15 @@ public class TableControlsManager : MonoBehaviour
     }
 
     // Sequence for this client
-    public static void SupplyCommunicationSequence(Sequence sequence)
+    //Return fake sequences
+    public static Sequence[] SupplyCommunicationSequence(Sequence sequence)
     {
         _currentSequenceToCommunicate = MapToSequenceWithQueue(sequence);
-        ResetSequencePanels();
-        GenerateSequencePanels();
+        //Debug.Log(_currentSequenceToCommunicate);
+        //ResetSequencePanels();
+        return GenerateSequencePanels(sequence);
+        //foreach (var thing in list)
+        //    Debug.Log(thing);
     }
 
     private static void ResetSequencePanels()
@@ -208,9 +349,52 @@ public class TableControlsManager : MonoBehaviour
         throw new NotImplementedException();
     }
 
-    private static void GenerateSequencePanels()
+    //Gets an array with (an amount specified by howmanyothers of) Sequences 
+    private static Sequence[] GenerateSequencePanels(
+        Sequence originalSequence, int howManyOthers = 2)
     {
-        throw new NotImplementedException();
+        //Debug.Log(howManyOthers);
+        //throw new NotImplementedException();
+        List<Sequence> otherSequences = new List<Sequence>() { originalSequence };
+
+        //Debug.Log(howManyOthers);
+        for (int i = 0; i < howManyOthers; i++)
+            otherSequences.Add(GetRandomDifferentSequence(otherSequences.ToArray()));
+
+        otherSequences.Remove(originalSequence);
+
+        return otherSequences.ToArray();
+    }
+
+    //Gets a random sequence different from the (variable) list of provided other sequences
+    //different by (currently): disaster type
+    private static Sequence GetRandomDifferentSequence(params Sequence[] originalSequences)
+    {
+        List<DisasterType> disasterTypeExclusions = new List<DisasterType>() { DisasterType.Total };
+        foreach (Sequence originalSequence in originalSequences)
+            disasterTypeExclusions.Add(originalSequence.disaster);
+
+        Sequence swq = new Sequence(
+            SequenceGenerator.GenerateIndex(500, 1000),
+            ExcludeDisasters(disasterTypeExclusions.ToArray()),
+            SequenceGenerator.GenerateTimer(500, 1000),
+            SequenceGenerator.GenerateComponentStatesArray(3));
+
+        //Debug.Log(swq);
+
+        return swq;
+    }
+
+    private static DisasterType ExcludeDisasters(params DisasterType[] exclusions)
+    {
+        List<DisasterType> disasters = new List<DisasterType>()
+            { DisasterType.Earthquake, DisasterType.Missle,
+                DisasterType.Tornado, DisasterType.Total, DisasterType.Vulcano};
+
+        foreach (DisasterType exclusion in exclusions)
+            disasters.Remove(exclusion);
+
+        return disasters[UnityEngine.Random.Range(0, disasters.Count)];
     }
 
     // Map it to an struct with queue for ease

@@ -74,7 +74,17 @@ public class SequencePanelScript : MonoBehaviour
                     go = Instantiate(Switches, transform);
                     int result = c.targets[0] + c.targets[1] * 2 + c.targets[2] * 4;
                     print($"{c.targets[0]}|{c.targets[1]}|{c.targets[2]}|{result}|{_checkboxSprites.Length}");
-                    go.GetComponent<Image>().sprite = _checkboxSprites[result];
+
+                    try
+                    {
+                        go.GetComponent<Image>().sprite = _checkboxSprites[result];
+                    }
+                    catch
+                    {
+                        //we don't care
+                        Debug.Log("THIS SHOULDN'T HAPPEN");
+                    }
+
                     break;
                 case Component.Wheel:
                     go = Instantiate(Wheel, transform);
