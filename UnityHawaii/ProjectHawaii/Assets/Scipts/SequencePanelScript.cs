@@ -29,12 +29,10 @@ public class SequencePanelScript : MonoBehaviour
             {
                 new ComponentState
                 {
-                    component = Component.Sliders,
+                    component = Component.Lever,
                     targets = new int[]
                     {
-                        25,
-                        50,
-                        60
+                        2
                     }
 
                 }
@@ -55,8 +53,7 @@ public class SequencePanelScript : MonoBehaviour
             switch (c.component)
             {
                 case Component.Lever:
-                    //TODO: Not implemented yet
-                    //Instantiate(Lever, transform);
+                    Instantiate(Lever, transform);
                     break;
                 case Component.Scroll:
                     GameObject go = Instantiate(Scroll, transform);
@@ -71,9 +68,12 @@ public class SequencePanelScript : MonoBehaviour
                     break;
                 case Component.Switches:
                     go = Instantiate(Switches, transform);
+                    int result = c.targets[0] + c.targets[1] * 2 + c.targets[2] * 4;
+                    go.GetComponent<Image>().sprite = _checkboxSprites[result];
                     break;
                 case Component.Wheel:
                     go = Instantiate(Wheel, transform);
+                    go.transform.Rotate(new Vector3(0,0,c.targets[0]));
                     break;
             }
         });

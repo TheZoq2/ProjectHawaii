@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: b7f7cd6f69d220745bfe4757f2f6746d
-timeCreated: 1517095325
+timeCreated: 1517102536
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -10,6 +10,8 @@ TextureImporter:
     21300006: Toggles_3
     21300008: Toggles_4
     21300010: Toggles_5
+    21300012: Toggles_6
+    21300014: Toggles_7
   externalObjects: {}
   serializedVersion: 4
   mipmaps:
@@ -159,7 +161,35 @@ TextureImporter:
       name: Toggles_5
       rect:
         serializedVersion: 2
-        x: 500
+        x: 501
+        y: 0
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Toggles_6
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 0
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Toggles_7
+      rect:
+        serializedVersion: 2
+        x: 700
         y: 0
         width: 100
         height: 100
