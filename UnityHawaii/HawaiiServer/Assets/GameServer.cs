@@ -131,15 +131,15 @@ public class GameServer : MonoBehaviour {
     }
     List<int> switch_targets() {
         return new List<int>(){
-            Random.Range(0,1),
-            Random.Range(0,1),
-            Random.Range(0,1),
-            Random.Range(0,1)
+            Random.Range(0,2),
+            Random.Range(0,2),
+            Random.Range(0,2),
+            Random.Range(0,2)
         };
     }
     List<int> scroll_targets() {
         var result = list_of_four();
-        result[0] = Random.Range(0,100);
+        result[0] = Random.Range(1,100);
         return result;
     }
     List<int> slider_targets() {

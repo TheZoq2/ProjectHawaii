@@ -22,8 +22,8 @@ public class SliderInfo : MonoBehaviour, IResetable
     
     private void PassInfoIntoSingleton(float f)
     {
-        TableControlsManager.instance.SetSlider(_position, _slider.value);
-        TableControlsManager.instance.AddResetable(this);
+        TableControlsManager.Instance.SetSlider(_position, _slider.value);
+        TableControlsManager.Instance.AddResetable(this);
     }
 
     public void Reset()

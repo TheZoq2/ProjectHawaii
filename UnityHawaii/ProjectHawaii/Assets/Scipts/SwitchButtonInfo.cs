@@ -21,7 +21,7 @@ public class SwitchButtonInfo : MonoBehaviour, IResetable
 
     private void PassInfoToSingleton(bool b)
     {
-        TableControlsManager.instance.SetSwitch(_position, _toggle.isOn);
+        TableControlsManager.Instance.SetSwitch(_position, _toggle.isOn);
     }
 
     public void Reset()

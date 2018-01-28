@@ -21,13 +21,13 @@ namespace Assets.Scripts
         void Start()
         {
             EventManager.OnClicked += CalamitiesChanged;
-            _colorGameObjects = new []
-            {
-                GameObject.Find("IslandSelector").transform.Find("Red").gameObject,
-                GameObject.Find("IslandSelector").transform.Find("Green").gameObject,
-                GameObject.Find("IslandSelector").transform.Find("Blue").gameObject,
-                GameObject.Find("IslandSelector").transform.Find("Yellow").gameObject
-            };
+//            _colorGameObjects = new []
+//            {
+//                GameObject.Find("IslandSelector").transform.Find("Red").gameObject,
+//                GameObject.Find("IslandSelector").transform.Find("Green").gameObject,
+//                GameObject.Find("IslandSelector").transform.Find("Blue").gameObject,
+//                GameObject.Find("IslandSelector").transform.Find("Yellow").gameObject
+//            };
         }
 
         // Update is called once per frame
@@ -41,31 +41,31 @@ namespace Assets.Scripts
 
         public void SpawnAWarning()
         {
-            GameObject g = Instantiate(Prefab, GameObject.FindGameObjectWithTag("WarningPanel").transform);
-
-            var script = g.GetComponent<WarningMovementScript>();
-
-            script.SequenceOrder = Statics.Warnings.Count + 1;
-            script.SetCalamity(_calamities[Mathf.FloorToInt(Random.Range(0, 4))]);
-
-            Statics.Warnings.Add(g);
-            EventManager.CalamitiesChanged();
+//            GameObject g = Instantiate(Prefab, GameObject.FindGameObjectWithTag("WarningPanel").transform);
+//
+//            var script = g.GetComponent<WarningMovementScript>();
+//
+//            script.SequenceOrder = Statics.Warnings.Count + 1;
+//            script.SetCalamity(_calamities[Mathf.FloorToInt(Random.Range(0, 4))]);
+//
+//            Statics.Warnings.Add(g);
+//            EventManager.CalamitiesChanged();
         }
 
         private void CalamitiesChanged()
         {
-            HashSet<string> strings = new HashSet<string>();
-            GameObject go = GameObject.Find("IslandSelector");
-
-            Statics.Warnings.ForEach(w =>
-            {
-                strings.Add(HelperFunctions.ParseColorToString(w.GetComponent<Image>().color));
-            });
-
-            foreach (GameObject co in _colorGameObjects)
-            {
-                co.SetActive(strings.Contains(co.name));
-            }
+//            HashSet<string> strings = new HashSet<string>();
+//            GameObject go = GameObject.Find("IslandSelector");
+//
+//            Statics.Warnings.ForEach(w =>
+//            {
+//                strings.Add(HelperFunctions.ParseColorToString(w.GetComponent<Image>().color));
+//            });
+//
+//            foreach (GameObject co in _colorGameObjects)
+//            {
+//                co.SetActive(strings.Contains(co.name));
+//            }
         }
     }
 }

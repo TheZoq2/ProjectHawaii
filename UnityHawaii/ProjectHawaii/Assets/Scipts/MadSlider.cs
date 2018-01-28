@@ -52,8 +52,8 @@ public class MadSlider : MonoBehaviour, IResetable
         }
         currentId = id;
 
-        TableControlsManager.instance.SetLever(id);
-        TableControlsManager.instance.AddResetable(this);
+        TableControlsManager.Instance.SetLever(id);
+        TableControlsManager.Instance.AddResetable(this);
 
     }
 
