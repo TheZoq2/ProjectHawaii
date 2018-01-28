@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Component = Messages.Component;
 
 // ReSharper disable CheckNamespace
@@ -150,6 +151,8 @@ public class TableControlsManager : MonoBehaviour
     private static int[] _sliders = new int[3] {
         0,0,0
     };
+
+    private static List<SequencePanelScript> _cleaners = null;
 
     private void Start()
     {
@@ -321,19 +324,57 @@ public class TableControlsManager : MonoBehaviour
 
     // Sequence for this client
     //Return fake sequences
-    public static Sequence[] SupplyCommunicationSequence(Sequence sequence)
+    public static void SupplyCommunicationSequence(
+        Sequence sequence, GameObject holder,
+        GameObject sequencePanelPrefab, GameObject warningImagePrefab,
+        Dictionary<DisasterType, Sprite> spriteDictionary)
     {
         _currentSequenceToCommunicate = MapToSequenceWithQueue(sequence);
         //Debug.Log(_currentSequenceToCommunicate);
-        //ResetSequencePanels();
-        return GenerateSequencePanels(sequence);
-        //foreach (var thing in list)
-        //    Debug.Log(thing);
+        ResetSequencePanels();
+        var fakeSequences = GenerateSequencePanels(sequence);
+
+        _cleaners.Add(DrawSequence(sequence, holder, sequencePanelPrefab,
+            warningImagePrefab, spriteDictionary, true)
+        );
+
+        foreach (Sequence fakeSequence in fakeSequences)
+            _cleaners.Add(DrawSequence(fakeSequence, holder, sequencePanelPrefab,
+                warningImagePrefab, spriteDictionary, true));
     }
 
     private static void ResetSequencePanels()
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
+        foreach (SequencePanelScript cleaner in _cleaners)
+            while (cleaner != null) cleaner.PopPanel(true);
+        _cleaners = null;
+    }
+
+    private static SequencePanelScript DrawSequence(
+        Sequence sequence, GameObject holder, 
+        GameObject sequencePanelPrefab, GameObject warningImagePrefab,
+        Dictionary<DisasterType, Sprite> spriteDictionary, 
+        bool setTest = false)
+    {
+        GameObject panel = Instantiate(sequencePanelPrefab, holder.transform);
+        var script = panel.GetComponent<SequencePanelScript>();
+
+        script.SetSequenceAndId(sequence, Statics.Panels.Count);
+        //Testing
+        //if (setTest) sps = script;
+        //Testing
+
+        holder = GameObject.Find("WarningPanel");
+        GameObject warningImage = Instantiate(warningImagePrefab, holder.transform);
+
+        warningImage.GetComponent<Image>().sprite = spriteDictionary[sequence.disaster];
+        warningImage.GetComponent<Image>().color = new Color32(0, 0, 0, 255);
+
+        script.WarningImage = warningImage;
+        Statics.Panels.Add(panel);
+
+        return script;
     }
 
     //Gets an array with (an amount specified by howmanyothers of) Sequences 

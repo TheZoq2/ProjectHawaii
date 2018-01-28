@@ -115,38 +115,16 @@ public class GameClient : MonoBehaviour
 
             // Add a sequence panel to the holder and a image to the image holder, make sure that these can later be accessed to be deleted/modified
             GameObject holder = GameObject.Find("SequencePanelsHolder");
-            DrawSequence(sequence, holder, true);
+            //DrawSequence(sequence, holder, true);
             GameObject panel = Instantiate(_sequencePanelPrefab, holder.transform);
             panel.name = "CorrectSequencePanel";
             var script = panel.GetComponent<SequencePanelScript>();
 
-            var fakeSequences =  TableControlsManager.SupplyCommunicationSequence(sequence);
-            foreach (Sequence seq in fakeSequences)
-                DrawSequence(seq, holder);
+            TableControlsManager.SupplyCommunicationSequence(sequence, holder, 
+                _sequencePanelPrefab, _warningImagePrefab, _spriteDictionary);
         }
         // Debug.Log("Disaster type: " + sequence.disaster.ToString());
         // Debug.Log("Components: " + sequence.components.Length.ToString());
-    }
-
-    private void DrawSequence(Sequence sequence, GameObject holder, bool setTest = false)
-    {
-        GameObject panel = Instantiate(_sequencePanelPrefab, holder.transform);
-        var script = panel.GetComponent<SequencePanelScript>();
-        
-        script.SetSequenceAndId(sequence, Statics.Panels.Count);
-        //Testing
-        if (setTest) sps = script;
-        //Testing
-
-        holder = GameObject.Find("WarningPanel");
-        GameObject warningImage = Instantiate(_warningImagePrefab, holder.transform);
-
-
-        warningImage.GetComponent<Image>().sprite = _spriteDictionary[sequence.disaster];
-        warningImage.GetComponent<Image>().color = new Color32(0, 0, 0, 255);
-
-        script.WarningImage = warningImage;
-        Statics.Panels.Add(panel);
     }
 
     void ComponentComplete() {
