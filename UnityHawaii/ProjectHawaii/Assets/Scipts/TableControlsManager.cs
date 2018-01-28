@@ -9,6 +9,12 @@ using UnityEngine;
 public class TableControlsManager : MonoBehaviour
 {
     private Coroutine _componentResetCoroutine = null;
+    private Coroutine _sequencesFlushCoroutine = null;
+
+    private bool _flushing
+    {
+        get { return _sequencesFlushCoroutine != null; }
+    }
     private Messages.ComponentState _lastComponent = null;
     private HashSet<IResetable> _resetables = null;
 
@@ -31,7 +37,7 @@ public class TableControlsManager : MonoBehaviour
     {
         _instance = this;
         _resetables = new HashSet<IResetable>();
-        
+
         OnSequenceComplete += Received;
     }
 
@@ -39,27 +45,19 @@ public class TableControlsManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.A))
         {
-            SupplySequence(new Sequence(0, DisasterType.Earthquake, 5, 
+            SupplySequence(new Sequence(0, DisasterType.Earthquake, 5,
                 new ComponentState(Messages.Component.Lever, 3)));
         }
-        if (Input.GetKeyDown(KeyCode.Space)) CompleteAnswerAndSend();
+        if (Input.GetKeyDown(KeyCode.Space)) CompleteAnswerAndSend(false);
     }
 
     private void Received(Messages.SequenceComplete obj)
     {
         Debug.Log("Received Completed Sequence with result: " + obj.correct.ToString());
     }
-
-    #region Sequence Management
-
-    public void SupplySequence(Messages.Sequence sequence)
-    {
-        _serverSequence = sequence;
-        _mySequence = new List<Messages.ComponentState>();
-
-        StartCoroutine(Wait(sequence.timer, () => { TimeOutAnswer(true); }));
-    }
-
+    
+    #region Answers
+    
     private void CompleteAnswerAndSend(bool flush = true)
     {
         Messages.SequenceComplete result =
@@ -69,18 +67,10 @@ public class TableControlsManager : MonoBehaviour
         OnSequenceComplete?.Invoke(result);
     }
 
-    private string PrintCollection<T>(IEnumerable<T> collection)
-    {
-        string result = "";
-        foreach (var item in collection)
-            result += item.ToString() + ", "; // Replace this with your version of printing
-
-        return result;
-    }
-
     private Messages.SequenceComplete TimeOut()
     {
-        return new Messages.SequenceComplete(_serverSequence.index, false);
+        return new Messages.SequenceComplete(
+            _serverSequence?.index ?? -1, false);
     }
 
     private Messages.SequenceComplete TimeOut_Flush()
@@ -101,6 +91,8 @@ public class TableControlsManager : MonoBehaviour
 
     private Messages.SequenceComplete IsSequenceCorrect()
     {
+        if (_mySequence == null) return new Messages.SequenceComplete(-1, false);
+
         if (_mySequence.Count < _serverSequence.components.Length)
         {
             Debug.Log("Local Sequence not full.");
@@ -114,14 +106,21 @@ public class TableControlsManager : MonoBehaviour
 
     private void FlushLocalSequence()
     {
-        _mySequence = null;
-        _serverSequence = null;
+        if (_sequencesFlushCoroutine == null)
+            _sequencesFlushCoroutine = StartCoroutine(WaitForEndOfFrame(() =>
+            {
+                _mySequence = null;
+                _serverSequence = null;
+                _lastComponent = null;
 
-        foreach (IResetable resetable in _resetables)
-            resetable.Reset();
-        _resetables = new HashSet<IResetable>();
+                foreach (IResetable resetable in _resetables)
+                    resetable.Reset();
+                _resetables = new HashSet<IResetable>();
 
-        Debug.Log("Flushed local and server sequence. (Client-side Cache)");
+                Debug.Log("Flushed local and server sequence. (Client-side Cache)");
+
+                _sequencesFlushCoroutine = null;
+            }));
     }
 
     private Messages.SequenceComplete IsSequenceCorrect_Flush()
@@ -130,18 +129,31 @@ public class TableControlsManager : MonoBehaviour
         FlushLocalSequence();
         return result;
     }
+    #endregion
 
+    #region Sequence Management
+
+    public void SupplySequence(Messages.Sequence sequence)
+    {
+        _serverSequence = sequence;
+        _mySequence = new List<Messages.ComponentState>();
+
+        StartCoroutine(Wait(sequence.timer, () => { TimeOutAnswer(true); }));
+    }
     private void Log(Messages.ComponentState loggedComponent)
     {
-        if (DefendAgainstOverflow(loggedComponent)) return;
+        if (_mySequence != null && _lastComponent != null &&
+            loggedComponent != null &&
+            DefendAgainstOverflow(loggedComponent)) return;
 
         _lastComponent = loggedComponent;
+        if (_mySequence == null) return;
         _mySequence.Add(loggedComponent);
         if (_mySequence.Count >= _serverSequence.components.Length)
         {
             Debug.Log("My Sequence Full. Getting Correct Answer.");
 
-            CompleteAnswerAndSend(true);
+            CompleteAnswerAndSend(false);
             //throw new NotImplementedException("My Sequence Full");
         }
 
@@ -149,16 +161,13 @@ public class TableControlsManager : MonoBehaviour
         Debug.Log(PrintCollection(_mySequence));
     }
 
-    private IEnumerator Wait(float time, Action action)
-    {
-        yield return new WaitForSeconds(time);
-        action();
-    }
-
     private bool DefendAgainstOverflow(Messages.ComponentState component)
     {
-        StopCoroutine(_componentResetCoroutine);
-        _componentResetCoroutine = null;
+        if (_componentResetCoroutine != null)
+        {
+            StopCoroutine(_componentResetCoroutine);
+            _componentResetCoroutine = null;
+        }
 
         if (component.component != _lastComponent.component)
         {
@@ -167,11 +176,50 @@ public class TableControlsManager : MonoBehaviour
 
         _componentResetCoroutine = StartCoroutine(Wait(2, () => { _lastComponent = null; }));
 
-        _mySequence[_mySequence.Count - 1] = component;
+        try
+        {
+            _mySequence[_mySequence.Count - 1] = component;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            StartCoroutine(Wait(0.05f, () =>
+             {
+                 _mySequence[_mySequence.Count - 1] = component;
+             }));
+        }
 
-        return false;
+        return true;
     }
 
+    #endregion
+
+    #region Other
+    private string PrintCollection<T>(IEnumerable<T> collection)
+    {
+        string result = "";
+        if (collection == null) return result;
+
+        return collection.Aggregate(result, (current, item) => current + (item + ", "));
+    }
+
+    //Coroutines
+    private IEnumerator Wait(float time, Action action)
+    {
+        yield return new WaitForSeconds(time);
+        action();
+    }
+
+    private IEnumerator WaitForEndOfFrame(Action action)
+    {
+        yield return new WaitForEndOfFrame();
+        action();
+    }
+
+    private IEnumerator WaitForBeforeFrame(Action action)
+    {
+        yield return null;
+        action();
+    }
     #endregion
 
     #region Public Receiver Functions
@@ -185,7 +233,7 @@ public class TableControlsManager : MonoBehaviour
     {
         //_leverPosition = position;
 
-        Log(new Messages.ComponentState(Messages.Component.Lever, position));
+        Log(new ComponentState(Messages.Component.Lever, position));
     }
 
     public void SetWheel(float angle, bool radians = false)
@@ -193,7 +241,7 @@ public class TableControlsManager : MonoBehaviour
         if (radians) angle *= Mathf.Rad2Deg;
         int wheelAngle = (int)angle;
 
-        Log(new Messages.ComponentState(Messages.Component.Wheel, wheelAngle));
+        Log(new ComponentState(Messages.Component.Wheel, wheelAngle));
     }
 
     public void SetScrollwheel(float scroll)
