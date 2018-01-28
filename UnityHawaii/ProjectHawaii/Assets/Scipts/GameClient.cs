@@ -43,6 +43,7 @@ public class GameClient : MonoBehaviour
             { DisasterType.Missle,MissileSprite},
             { DisasterType.Vulcano,VolcanoSprite}
         };
+        EventManager.OnSequenceItemCompleted += ComponentComplete;
     }
 
     // Update is called once per frame
@@ -116,6 +117,7 @@ public class GameClient : MonoBehaviour
             // Add a sequence panel to the holder and a image to the image holder, make sure that these can later be accessed to be deleted/modified
             GameObject holder = GameObject.Find("SequencePanelsHolder");
             GameObject panel = Instantiate(_sequencePanelPrefab, holder.transform);
+            panel.name = "CorrectSequencePanel";
             var script = panel.GetComponent<SequencePanelScript>();
 
             script.SetSequenceAndId(sequence, Statics.Panels.Count);
@@ -145,5 +147,6 @@ public class GameClient : MonoBehaviour
     void OnNotifyComponentComplete(NetworkMessage msg) {
         //TODO Fix
         print("Got component complete notification");
+        GameObject.Find("CorrectSequencePanel").GetComponent<SequencePanelScript>().PopPanel();
     }
 }
