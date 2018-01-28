@@ -9,6 +9,7 @@ public class SwitchButtonInfo : MonoBehaviour, IResetable
     [SerializeField]
     private int _position = 0;
     private UnityEngine.UI.Toggle _toggle = null;
+    public AudioSource switchFlickAudioSource;
 
     // Use this for initialization
     private void Start()
@@ -27,5 +28,12 @@ public class SwitchButtonInfo : MonoBehaviour, IResetable
     public void Reset()
     {
         _toggle.isOn = false;
+    }
+
+
+    public void SetActiveEx(bool isSet)
+    {
+        transform.GetChild(0).gameObject.SetActive(!isSet);
+        switchFlickAudioSource.Play();
     }
 }

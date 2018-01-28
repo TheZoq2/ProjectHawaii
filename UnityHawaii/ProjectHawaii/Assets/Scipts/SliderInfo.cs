@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using Component = Messages.Component;
 
 public class SliderInfo : MonoBehaviour, IResetable
 {
@@ -11,6 +12,9 @@ public class SliderInfo : MonoBehaviour, IResetable
     private int _position = 0;
     private Slider _slider = null;
 
+    private SequenceWithQueue _currentSequenceToExecute;
+    private const Component CurrentComponent = Component.Sliders;
+
     // Use this for initialization
     private void Start()
     {
@@ -18,11 +22,19 @@ public class SliderInfo : MonoBehaviour, IResetable
         Debug.Assert(_slider != null);
 
         _slider.onValueChanged.AddListener(PassInfoIntoSingleton);
+        EventManager.OnSequenceItemChanged += SequenceItemHasChanged;
     }
-    
+
+    private void SequenceItemHasChanged(SequenceWithQueue s)
+    {
+        print(s.Components.Peek().component);
+        _currentSequenceToExecute = s.Components.Peek().component == CurrentComponent ? s : null;
+    }
+
     private void PassInfoIntoSingleton(float f)
     {
-        TableControlsManager.Instance.SetSlider(_position, _slider.value);
+        if (_currentSequenceToExecute != null)
+            TableControlsManager.Instance.SetSlider(_position, _slider.value);
     }
 
     public void Reset()

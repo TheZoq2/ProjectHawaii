@@ -10,7 +10,7 @@ public class EventManager : MonoBehaviour {
     public delegate void SequenceItemCompletedDelegate();
     public static event SequenceItemCompletedDelegate OnSequenceItemCompleted;
 
-    public delegate void SequenceItemChangedDelegate(Messages.Component c);
+    public delegate void SequenceItemChangedDelegate(SequenceWithQueue s);
     public static event SequenceItemChangedDelegate OnSequenceItemChanged;
 
     // Use this for initialization
@@ -33,8 +33,8 @@ public class EventManager : MonoBehaviour {
         OnSequenceItemCompleted?.Invoke();
     }
 
-    public static void SequenceItemHasChanged(Messages.Component c)
+    public static void SequenceItemHasChanged(SequenceWithQueue s)
     {
-        OnSequenceItemChanged?.Invoke(c);
+        OnSequenceItemChanged?.Invoke(s);
     }
 }
