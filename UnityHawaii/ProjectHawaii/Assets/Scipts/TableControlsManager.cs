@@ -12,20 +12,20 @@ using UnityEngine.UI;
 //#pragma warning disable 0414
 public class TableControlsManager : MonoBehaviour
 {
-    private static class SequenceGenerator
+    public static class SequenceGenerator
     {
-        public static SequenceWithQueue GenerateSequence()
+        public static Sequence GenerateSequence()
         {
             int length = UnityEngine.Random.Range(4, 10);
             List<ComponentState> components = new List<ComponentState>();
             for (int i = 0; i < length; i++)
                 components.Add(GenerateComponentState());
 
-            var queue = new SequenceWithQueue(
+            var queue = new Sequence(
                 UnityEngine.Random.Range(0, 1000000),
                 (DisasterType)UnityEngine.Random.Range(0, (int)DisasterType.Total),
-                components.ToArray(),
-                GenerateTimer(5, 10));
+                GenerateTimer(5, 10),
+                components.ToArray());
             return queue;
         }
 
@@ -229,12 +229,13 @@ public class TableControlsManager : MonoBehaviour
     }
 
     // Sequence for this client
-    public static void SupplyCommunicationSequence(Sequence sequence)
+    //Return fake sequences
+    public static Sequence[] SupplyCommunicationSequence(Sequence sequence)
     {
         _currentSequenceToCommunicate = MapToSequenceWithQueue(sequence);
         //Debug.Log(_currentSequenceToCommunicate);
         //ResetSequencePanels();
-        var list = GenerateSequencePanels(_currentSequenceToCommunicate);
+        return GenerateSequencePanels(sequence);
         //foreach (var thing in list)
         //    Debug.Log(thing);
     }
@@ -245,12 +246,12 @@ public class TableControlsManager : MonoBehaviour
     }
 
     //Gets an array with (an amount specified by howmanyothers of) Sequences 
-    private static SequenceWithQueue[] GenerateSequencePanels(
-        SequenceWithQueue originalSequence, int howManyOthers = 2)
+    private static Sequence[] GenerateSequencePanels(
+        Sequence originalSequence, int howManyOthers = 2)
     {
         //Debug.Log(howManyOthers);
         //throw new NotImplementedException();
-        List<SequenceWithQueue> otherSequences = new List<SequenceWithQueue>() { originalSequence };
+        List<Sequence> otherSequences = new List<Sequence>() { originalSequence };
 
         //Debug.Log(howManyOthers);
         for (int i = 0; i < howManyOthers; i++)
@@ -263,17 +264,17 @@ public class TableControlsManager : MonoBehaviour
 
     //Gets a random sequence different from the (variable) list of provided other sequences
     //different by (currently): disaster type
-    private static SequenceWithQueue GetRandomDifferentSequence(params SequenceWithQueue[] originalSequences)
+    private static Sequence GetRandomDifferentSequence(params Sequence[] originalSequences)
     {
         List<DisasterType> disasterTypeExclusions = new List<DisasterType>() { DisasterType.Total };
-        foreach (SequenceWithQueue originalSequence in originalSequences)
+        foreach (Sequence originalSequence in originalSequences)
             disasterTypeExclusions.Add(originalSequence.disaster);
 
-        SequenceWithQueue swq = new SequenceWithQueue(
+        Sequence swq = new Sequence(
             SequenceGenerator.GenerateIndex(500, 1000),
             ExcludeDisasters(disasterTypeExclusions.ToArray()),
-            SequenceGenerator.GenerateComponentStatesArray(3),
-            SequenceGenerator.GenerateTimer(500, 1000));
+            SequenceGenerator.GenerateTimer(500, 1000),
+            SequenceGenerator.GenerateComponentStatesArray(3));
 
         //Debug.Log(swq);
 
