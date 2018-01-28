@@ -43,11 +43,16 @@ public class GameClient : MonoBehaviour
             { DisasterType.Missle,MissileSprite},
             { DisasterType.Vulcano,VolcanoSprite}
         };
+        EventManager.OnSequenceItemCompleted += ComponentComplete;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if(Input.GetKeyDown("space")) {
+            print("Товарищ, спускайся");
+            ComponentComplete();
+        }
         //Testing
         //---------------------//
         //if (Input.GetKeyDown(KeyCode.P))
@@ -67,6 +72,7 @@ public class GameClient : MonoBehaviour
         client = new NetworkClient();
         client.RegisterHandler(MsgType.Connect, OnConnected);
         client.RegisterHandler(MessageType.SequenceStart, OnSequenceStart);
+        client.RegisterHandler(MessageType.NotifyComponentComplete, OnNotifyComponentComplete);
         client.Connect(url, port);
     }
 
@@ -97,8 +103,9 @@ public class GameClient : MonoBehaviour
     {
 
         // Check if this sequence should be shown or handled on this client
-        if (sequence.index % 2 == id % 2)
+        if (sequence.shouldHandle)
         {
+            //только для чтения, товарищ
             print("Got sequence to handle");
             TableControlsManager.SupplyExecutionSequence(sequence);
         }
@@ -109,6 +116,9 @@ public class GameClient : MonoBehaviour
             // Add a sequence panel to the holder and a image to the image holder, make sure that these can later be accessed to be deleted/modified
             GameObject holder = GameObject.Find("SequencePanelsHolder");
             DrawSequence(sequence, holder, true);
+            GameObject panel = Instantiate(_sequencePanelPrefab, holder.transform);
+            panel.name = "CorrectSequencePanel";
+            var script = panel.GetComponent<SequencePanelScript>();
 
             var fakeSequences =  TableControlsManager.SupplyCommunicationSequence(sequence);
             foreach (Sequence seq in fakeSequences)
@@ -122,7 +132,7 @@ public class GameClient : MonoBehaviour
     {
         GameObject panel = Instantiate(_sequencePanelPrefab, holder.transform);
         var script = panel.GetComponent<SequencePanelScript>();
-
+        
         script.SetSequenceAndId(sequence, Statics.Panels.Count);
         //Testing
         if (setTest) sps = script;
@@ -131,9 +141,21 @@ public class GameClient : MonoBehaviour
         holder = GameObject.Find("WarningPanel");
         GameObject warningImage = Instantiate(_warningImagePrefab, holder.transform);
 
+
         warningImage.GetComponent<Image>().sprite = _spriteDictionary[sequence.disaster];
+        warningImage.GetComponent<Image>().color = new Color32(0, 0, 0, 255);
 
         script.WarningImage = warningImage;
         Statics.Panels.Add(panel);
+    }
+
+    void ComponentComplete() {
+        client.Send(MessageType.ComponentComplete, new ComponentComplete());
+    }
+
+    void OnNotifyComponentComplete(NetworkMessage msg) {
+        //TODO Fix
+        print("Got component complete notification");
+        GameObject.Find("CorrectSequencePanel").GetComponent<SequencePanelScript>().PopPanel();
     }
 }

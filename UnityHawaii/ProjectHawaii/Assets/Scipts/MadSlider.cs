@@ -22,8 +22,11 @@ public class MadSlider : MonoBehaviour, IResetable
     [SerializeField, ReadOnly]
     int currentId;
 
+    public FadingAudioSource MadSliderAudioSource;
+
     public void SetIsland(int id)
     {
+        PlaySound();
         var tarPos = _points[id].position;
 
         print(" cur id: " + currentId);
@@ -31,7 +34,7 @@ public class MadSlider : MonoBehaviour, IResetable
         {
             var firstPos = tarPos;
             firstPos.y = _mover.position.y;
-            _mover.DOMove(firstPos, _oneMoveTime).OnComplete(() => _mover.DOMove(tarPos, _oneMoveTime));
+            _mover.DOMove(firstPos, _oneMoveTime).OnComplete(() => _mover.DOMove(tarPos, _oneMoveTime).OnComplete(()=> StopSound()));
         }
         else
         {
@@ -47,7 +50,7 @@ public class MadSlider : MonoBehaviour, IResetable
                 secPos.y = _points[0].position.y;
                 _mover.DOMove(firstPos, _oneMoveTime).
                     OnComplete(() => _mover.DOMove(secPos, _oneMoveTime).
-                    OnComplete(() => _mover.DOMove(tarPos, _oneMoveTime)));
+                    OnComplete(() => _mover.DOMove(tarPos, _oneMoveTime).OnComplete(() => StopSound()) ));
             }
         }
         currentId = id;
@@ -103,5 +106,15 @@ public class MadSlider : MonoBehaviour, IResetable
         }
         
         currentId = 0;
+    }
+
+    public void PlaySound()
+    {
+        MadSliderAudioSource.Play(0.5f);
+    }
+
+    public void StopSound()
+    {
+        MadSliderAudioSource.StopByFade();
     }
 }

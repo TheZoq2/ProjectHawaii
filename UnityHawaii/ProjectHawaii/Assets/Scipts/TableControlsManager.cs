@@ -1,15 +1,34 @@
-﻿using System;
-using System.Linq;
-using System.Collections;
+﻿using Messages;
+using System;
 using System.Collections.Generic;
-using Messages;
 using UnityEngine;
-using UnityEngine.UI;
+using Component = Messages.Component;
 
 // ReSharper disable CheckNamespace
 // ReSharper disable UnusedMember.Local
 
 //#pragma warning disable 0414
+//public struct SequenceWithQueue
+//{
+//    public int index;
+//    public DisasterType disaster;
+//    public Queue<ComponentState> Components;
+//    public int timer;
+
+//    public SequenceWithQueue(int index, DisasterType disaster, ComponentState[] components, int timer)
+//    {
+//        this.index = index;
+//        this.disaster = disaster;
+//        this.Components = new Queue<ComponentState>(components);
+//        this.timer = timer;
+//    }
+
+//    public override string ToString()
+//    {
+//        return base.ToString() + $": index({index}), disaster({disaster}), timer({timer})";
+//    }
+//}
+
 public class TableControlsManager : MonoBehaviour
 {
     public static class SequenceGenerator
@@ -122,51 +141,81 @@ public class TableControlsManager : MonoBehaviour
             return UnityEngine.Random.Range(5, 10);
         }
     }
-
-    struct SequenceWithQueue
-    {
-        public int index;
-        public DisasterType disaster;
-        public Queue<ComponentState> Components;
-        public int timer;
-
-        public SequenceWithQueue(int index, DisasterType disaster, ComponentState[] components, int timer)
-        {
-            this.index = index;
-            this.disaster = disaster;
-            this.Components = new Queue<ComponentState>(components);
-            this.timer = timer;
-        }
-
-        public override string ToString()
-        {
-            return base.ToString() + $": index({index}), disaster({disaster}), timer({timer})";
-        }
-    }
-
-
+    
     public static TableControlsManager Instance { get; private set; }
     private static SequenceWithQueue _currentSequenceToExecute;
     private static SequenceWithQueue _currentSequenceToCommunicate;
 
+    private static bool[] _switches = new bool[3] { false, false, false };
+    private static int[] _sliders = new int[3] {
+        0,0,0
+    };
 
     private void Start()
     {
         Instance = this;
         EventManager.OnSequenceItemCompleted += SequenceItemCompleted;
+//
+//        SupplyExecutionSequence(new Sequence
+//        {
+//            components = new ComponentState[4]
+//            {
+//                new ComponentState
+//                {
+//                    component = Component.Wheel,
+//                    targets = new int[1] {
+//                        20
+//                        }
+//                },
+//                new ComponentState
+//                {
+//                    component = Component.Scroll,
+//                    targets = new int[]
+//                    {
+//                        60
+//                    }
+//                },
+//                new ComponentState
+//                {
+//                    component = Component.Switches,
+//                    targets = new int[3] {
+//                        1,0,1
+//                }
+//                },
+//                new ComponentState
+//                {
+//                    component = Component.Sliders,
+//                    targets = new int[3]
+//                    {
+//                        30,40,70
+//                    }
+//                }
+//            }
+//        });
     }
 
     // Called from Event
     public static void SequenceItemCompleted()
     {
+        if (_currentSequenceToExecute.Components.Count == 0)
+        {
+            SequenceCompleted();
+            return;
+        }
         _currentSequenceToExecute.Components.Dequeue();
         //Panel.RemoveFirstItem();
         ReadNextSequenceItem();
     }
 
+    private static void SequenceCompleted()
+    {
+        print("finished");
+    }
+
     private static void ReadNextSequenceItem()
     {
-        EventManager.SequenceItemHasChanged(_currentSequenceToCommunicate.Components.Peek().component);
+        print(_currentSequenceToExecute.Components.Peek().component);
+        EventManager.SequenceItemHasChanged(_currentSequenceToExecute);
     }
 
 
@@ -184,12 +233,18 @@ public class TableControlsManager : MonoBehaviour
         if (radians) angle *= Mathf.Rad2Deg;
         int wheelAngle = (int)angle;
 
+        if (wheelAngle == _currentSequenceToExecute.Components.Peek().targets[0])
+            EventManager.SequenceItemCompleted();
+
         //Log(new ComponentState(Messages.Component.Wheel, wheelAngle));
     }
 
     public void SetScrollwheel(float scroll)
     {
-        int scrollbar = (int)(scroll * 100);
+        int scrollbar = (int)((1 - scroll) * 100);
+
+        if (Mathf.Abs(scrollbar - _currentSequenceToExecute.Components.Peek().targets[0]) < 5)
+            EventManager.SequenceItemCompleted();
 
         //Log(new ComponentState(Messages.Component.Scroll, scrollbar));
     }
@@ -199,9 +254,26 @@ public class TableControlsManager : MonoBehaviour
         if (position < 1 && position > 3)
             throw new InvalidOperationException
                 ("Input Switch Position out of range (0..2).");
-        //_switches[position - 1] = switchValue;
 
-        //Log(new ComponentState(Messages.Component.Switches, position, Convert.ToInt32(switchValue)));
+        _switches[position - 1] = !switchValue;
+        if(_currentSequenceToExecute.Components.Peek().component == Component.Switches)
+            CheckSwitches();
+    }
+
+    private void CheckSwitches()
+    {
+        var target = _currentSequenceToExecute.Components.Peek();
+        bool[] boolArray = new bool[3]
+        {
+            target.targets[0] != 0,
+            target.targets[1] != 0,
+            target.targets[2] != 0
+        };
+
+        print($"{_switches[0]}|{boolArray[0]}|{_switches[1]}|{boolArray[1]}|{_switches[2]}|{boolArray[2]}|");
+
+        if (_switches[0] == boolArray[0] && _switches[1] == boolArray[1] && _switches[2] == boolArray[2])
+            EventManager.SequenceItemCompleted();
     }
 
     public void SetSlider(int position, float sliderValue = 0)
@@ -213,9 +285,24 @@ public class TableControlsManager : MonoBehaviour
             throw new InvalidOperationException
                 ("Input Slider Value out of range (0..1).");
 
-        //_sliders[position - 1] = (int)(sliderValue * 100);
-
+        
         // Log(new ComponentState(Messages.Component.Sliders, position, (int)(sliderValue * 100)));
+
+        _sliders[position - 1] = (int)(sliderValue * 100);
+        CheckSliders();
+    }
+
+    private void CheckSliders()
+    {
+        var target = _currentSequenceToExecute.Components.Peek();
+        bool[] boolArray = new bool[3]
+        {
+            target.targets[0] != 0,
+            target.targets[1] != 0,
+            target.targets[2] != 0
+        };
+        if (Math.Abs(_sliders[0] - target.targets[0]) < 15 && Math.Abs(_sliders[1] - target.targets[1]) < 15 && Math.Abs(_sliders[2] - target.targets[2]) < 15)
+            EventManager.SequenceItemCompleted();
     }
 
     #endregion

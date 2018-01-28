@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
+using Component = Messages.Component;
 
 public class GUIWheel : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler,
     IPointerUpHandler, IResetable
@@ -21,12 +22,22 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
     public Text text;
     public FadingAudioSource wheelSource;
     public AudioSource correctPositionSource;
-    public UnityEvent onValueChange;
+
+    private SequenceWithQueue _currentSequenceToExecute;
+    private const Component CurrentComponent = Component.Wheel;
 
     private void Start()
     {
         if (text != null) text.text = "0.0";
+        EventManager.OnSequenceItemChanged += SequenceItemHasChanged;
     }
+
+    private void SequenceItemHasChanged(SequenceWithQueue s)
+    {
+        print(s.Components.Peek().component);
+        _currentSequenceToExecute = s.Components.Peek().component == CurrentComponent ? s : null;
+    }
+
 
     // Update is called once per frame
     void Update()
@@ -77,10 +88,10 @@ public class GUIWheel : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
         CurrentRotation = transform.localRotation.eulerAngles.z;
         //text.text = CurrentRotation.ToString();
 
-        TableControlsManager.Instance.SetWheel(CurrentRotation);
+        if(_currentSequenceToExecute != null)
+            TableControlsManager.Instance.SetWheel(CurrentRotation);
         //TableControlsManager.Instance.AddResetable(this);
         if (text != null) text.text = CurrentRotation.ToString();
-        onValueChange.Invoke();
     }
 
     public void OnEndDrag(PointerEventData eventdata)

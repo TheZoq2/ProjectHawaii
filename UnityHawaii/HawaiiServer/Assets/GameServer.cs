@@ -11,8 +11,8 @@ public class GameServer : MonoBehaviour {
 
     bool isAtStartup = false;
 
-    List<int> clients;
-    Sequence currentSequence;
+    List<int> clients = new List<int>();
+    Dictionary<int, int> sequenceLengths = new Dictionary<int, int>();
 
     public void SetupServer() {
         NetworkServer.RegisterHandler(MessageType.ComponentComplete, OnComponentComplete);
@@ -38,13 +38,22 @@ public class GameServer : MonoBehaviour {
     }
 
     void OnComponentComplete(NetworkMessage msg) {
+        print("Got component complete message");
         var connectionId = msg.conn.connectionId;
-        if(currentSequence == null || currentSequence.components.Length <= 1) {
-            sendSequence(connectionId);
+
+        if(sequenceLengths[connectionId] <= 1) {
+            //sendNewSequenceToAllClients();
+            sendSequence(connectionId, generateSequence());
         }
         else {
+            sequenceLengths[connectionId]--;
             var otherClient = clients.Where((x) => connectionId != x).ToList()[0];
-            NetworkServer.SendToClient(otherClient, MessageType.NotifyComponentComplete, null);
+            print("Other client " + otherClient);
+            NetworkServer.SendToClient(
+                otherClient,
+                MessageType.NotifyComponentComplete,
+                new NotifyComponentComplete()
+            );
         }
     }
 
@@ -54,7 +63,18 @@ public class GameServer : MonoBehaviour {
         var connectionId = msg.conn.connectionId;
 
         clients.Add(connectionId);
+
+        sendNewSequenceToAllClients();
     }
+
+    void sendNewSequenceToAllClients() {
+        print("Sending sequence to all clients");
+        if(clients.Count == 2) {
+            sendSequence(clients[0], generateSequence());
+            sendSequence(clients[1], generateSequence());
+        }
+    }
+
     void OnClientDisconnect(NetworkMessage msg) {
         Debug.Log("Client disconnected");
 
@@ -62,8 +82,8 @@ public class GameServer : MonoBehaviour {
         clients.Where((x) => connectionId != x);
     }
 
-    void sendSequence(int handlingClientId) {
-        var sequence = generateSequence();
+    void sendSequence(int handlingClientId, Sequence sequence) {
+        sequenceLengths[handlingClientId] = sequence.components.Length;
 
         foreach(var client in clients) {
             if(client == handlingClientId) {
@@ -72,10 +92,10 @@ public class GameServer : MonoBehaviour {
             else {
                 sequence.shouldHandle = false;
             }
+            print("Client: " + client + " handlingId: " + handlingClientId + " shouldHandle" + sequence.shouldHandle);
 
             NetworkServer.SendToClient(client, MessageType.SequenceStart, sequence);
         }
-
     }
 
      Sequence generateSequence() {
