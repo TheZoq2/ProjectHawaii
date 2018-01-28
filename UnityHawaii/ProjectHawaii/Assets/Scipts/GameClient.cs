@@ -5,6 +5,7 @@ using UnityEngine.Networking;
 using Messages;
 using System.Linq;
 using UnityEngine.UI;
+using Component = Messages.Component;
 
 public class GameClient : MonoBehaviour
 {
@@ -27,11 +28,14 @@ public class GameClient : MonoBehaviour
     public int port;
     private int id;
 
+    //Testing
+    //private SequencePanelScript sps = null;
+
     // Use this for initialization
     void Start()
     {
         SetupClient();
-        
+
         _spriteDictionary = new Dictionary<DisasterType, Sprite>
         {
             { DisasterType.Earthquake,EarthquakeSprite},
@@ -44,6 +48,19 @@ public class GameClient : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Testing
+        //---------------------//
+        //if (Input.GetKeyDown(KeyCode.P))
+        //{
+        //    SetSequence(new Sequence(5, DisasterType.Earthquake, 1999,
+        //        new ComponentState(Component.Scroll, 50),
+        //        new ComponentState(Component.Sliders, 0, 30, 100),
+        //        new ComponentState(Component.Wheel, 90),
+        //        new ComponentState(Component.Lever, 3)
+        //        ));
+        //}
+
+        //if (Input.GetKeyDown(KeyCode.E) && sps != null) sps.PopPanel();
     }
 
     public void SetupClient()
@@ -75,6 +92,11 @@ public class GameClient : MonoBehaviour
     void OnSequenceStart(NetworkMessage msg)
     {
         var sequence = msg.ReadMessage<Sequence>();
+        SetSequence(sequence);
+    }
+
+    void SetSequence(Sequence sequence)
+    {
 
         // Check if this sequence should be shown or handled on this client
         if (sequence.index % 2 == id % 2)
@@ -92,6 +114,9 @@ public class GameClient : MonoBehaviour
             var script = panel.GetComponent<SequencePanelScript>();
 
             script.SetSequenceAndId(sequence, Statics.Panels.Count);
+            //Testing
+            //sps = script;
+            //Testing
 
             holder = GameObject.Find("WarningPanel");
             GameObject warningImage = Instantiate(_warningImagePrefab, holder.transform);
