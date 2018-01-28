@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Messages;
@@ -8,6 +9,7 @@ using Component = Messages.Component;
 
 public class SequencePanelScript : MonoBehaviour
 {
+    private bool _tweening = false;
 
     public GameObject Lever;
     public GameObject Scroll;
@@ -76,7 +78,7 @@ public class SequencePanelScript : MonoBehaviour
                     break;
                 case Component.Wheel:
                     go = Instantiate(Wheel, transform);
-                    go.transform.Rotate(new Vector3(0,0,c.targets[0]));
+                    go.transform.Rotate(new Vector3(0, 0, c.targets[0]));
                     break;
             }
         });
@@ -85,5 +87,51 @@ public class SequencePanelScript : MonoBehaviour
     public void DecrementId()
     {
         _panelId--;
+    }
+
+    public void PopPanel(bool immediate = false)
+    {
+        if (transform.childCount > 0 && !_tweening)
+        {
+            Transform panel = transform.GetChild(0);
+            if (immediate) DestroyPanel(panel);
+            else
+            {
+                Image[] images = panel.GetComponentsInChildren<Image>();
+                float time = 0;
+
+                if (images != null && images.Length > 0)
+                {
+                    _tweening = true;
+                    time += 0.5f;
+                    foreach (Image image in images)
+                        image.CrossFadeAlpha(0, time, false);
+                    time += 0.05f;
+                }
+
+                StartCoroutine(Wait(time, () =>
+                {
+                    DestroyPanel(panel);
+                    _tweening = false;
+                }));
+            }
+        }
+    }
+
+    private void DestroyPanel(Transform panel)
+    {
+        Destroy(panel.gameObject);
+        Debug.Log("Destroyed " + panel.name);
+        if (transform.childCount <= 1)
+        {
+            Destroy(gameObject);
+            Debug.Log("Destroyed " + gameObject.name);
+        }
+    }
+
+    private IEnumerator Wait(float time, Action action)
+    {
+        yield return new WaitForSeconds(time);
+        action();
     }
 }
